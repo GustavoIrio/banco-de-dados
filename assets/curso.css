@@ -1,0 +1,202 @@
+/* =====================================================================
+   curso.css — folha de estilo única do curso de Banco de Dados (UC4)
+   Usada por: aulas (body.deck), listas e referências (body.doc), index.
+   Sem dependências externas: funciona offline no laboratório.
+   ===================================================================== */
+
+:root {
+  --papel: #fbfaf6;
+  --tinta: #1d1c1a;
+  --suave: #5f5b53;
+  --linha: #d9d4c7;
+  --azul: #1b4f7a;
+  --azul-claro: #e6eef5;
+  --laranja: #b9501a;
+  --laranja-claro: #fbeee3;
+  --verde: #23703f;
+  --verde-claro: #e3f3e8;
+  --vermelho: #a32a2a;
+  --vermelho-claro: #f8e4e4;
+  --codigo-fundo: #f1eee6;
+  --serifa: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --sem-serifa: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "Cascadia Code", Consolas, "DejaVu Sans Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--papel); color: var(--tinta); }
+body { margin: 0; font-family: var(--sem-serifa); line-height: 1.45; }
+h1, h2, h3 { font-family: var(--serifa); font-weight: 600; line-height: 1.15; margin: 0 0 .5em; }
+a { color: var(--azul); }
+p { margin: 0 0 .7em; }
+ul, ol { margin: 0 0 .7em; padding-left: 1.3em; }
+li { margin-bottom: .3em; }
+strong { font-weight: 650; }
+em.termo { font-style: normal; font-weight: 650; color: var(--azul); }
+
+code, pre, kbd { font-family: var(--mono); }
+code { background: var(--codigo-fundo); padding: .05em .3em; border-radius: .2em; font-size: .92em; }
+pre { background: var(--codigo-fundo); border-left: .25em solid var(--azul); padding: .7em .9em;
+      margin: 0 0 .8em; overflow-x: auto; line-height: 1.35; border-radius: 0 .3em .3em 0; }
+pre code { background: none; padding: 0; font-size: .78em; }
+pre.erro { border-left-color: var(--vermelho); background: var(--vermelho-claro); }
+pre.saida { border-left-color: var(--suave); background: transparent; border: 1px solid var(--linha); border-left-width: .25em; }
+.sql-kw { color: var(--azul); font-weight: 650; }
+.sql-str { color: var(--verde); }
+.sql-num { color: var(--laranja); }
+.sql-com { color: var(--suave); font-style: italic; }
+kbd { border: 1px solid var(--linha); border-bottom-width: 2px; border-radius: .25em; padding: 0 .35em; font-size: .85em; background: #fff; }
+
+table { border-collapse: collapse; margin: 0 0 .8em; font-size: .88em; }
+th, td { padding: .28em .7em; text-align: left; border-bottom: 1px solid var(--linha); vertical-align: top; }
+th { border-bottom: 2px solid var(--tinta); font-weight: 650; white-space: nowrap; }
+caption { caption-side: top; text-align: left; font-family: var(--mono); font-weight: 700; color: var(--azul); padding-bottom: .2em; }
+td.nulo { color: var(--suave); font-style: italic; }
+td.pk, th.pk { font-weight: 700; }
+td.fk, th.fk { color: var(--laranja); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.duas { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; align-items: start; }
+.duas.estreita-larga { grid-template-columns: 2fr 3fr; }
+.duas.larga-estreita { grid-template-columns: 3fr 2fr; }
+.tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.2em; align-items: start; }
+
+.caixa { border: 1px solid var(--linha); border-radius: .35em; padding: .6em .8em; margin-bottom: .8em; background: #fff; }
+.caixa.aviso { border-color: var(--laranja); background: var(--laranja-claro); }
+.caixa.ideia { border-color: var(--azul); background: var(--azul-claro); }
+.caixa.certo { border-color: var(--verde); background: var(--verde-claro); }
+.caixa > :last-child { margin-bottom: 0; }
+.rotulo { font-size: .7em; letter-spacing: .09em; text-transform: uppercase; font-weight: 700; color: var(--suave); display: block; margin-bottom: .3em; }
+.fonte { font-size: .66em; color: var(--suave); line-height: 1.35; }
+span.fonte { display: inline-block; }
+.fonte a { color: var(--suave); }
+.grande { font-size: 1.35em; font-family: var(--serifa); line-height: 1.25; }
+.centro { text-align: center; }
+
+/* ---------- Diagramas simples (DER em caixas) ---------- */
+.der { display: flex; align-items: center; justify-content: center; gap: 0; margin: .4em 0 .8em; flex-wrap: nowrap; font-size: .8em; }
+.entidade { border: .12em solid var(--tinta); padding: .35em .8em; background: #fff; font-weight: 650; min-width: 5em; text-align: center; white-space: nowrap; }
+.relacao { transform: rotate(45deg); border: .12em solid var(--azul); width: 3.6em; height: 3.6em; flex: none; display: grid; place-items: center; background: var(--azul-claro); margin: .85em .75em; }
+.relacao span { transform: rotate(-45deg); font-size: .72em; font-weight: 650; }
+.liga { border-top: .12em solid var(--tinta); min-width: 3.8em; flex: none; text-align: center; font-family: var(--mono); font-size: .8em; padding-top: 0; position: relative; height: 0; }
+.liga b { position: absolute; top: -1.6em; left: 0; right: 0; color: var(--laranja); }
+.tabela-der { border: .12em solid var(--tinta); background: #fff; font-size: .8em; min-width: 9em; }
+.tabela-der h4 { margin: 0; padding: .25em .6em; background: var(--tinta); color: var(--papel); font-family: var(--sem-serifa); font-size: 1em; }
+.tabela-der ul { list-style: none; margin: 0; padding: .3em .6em; font-family: var(--mono); font-size: .92em; }
+.tabela-der li { margin: 0; }
+.tabela-der li.pk::before { content: "PK "; color: var(--azul); font-weight: 700; }
+.tabela-der li.fk::before { content: "FK "; color: var(--laranja); font-weight: 700; }
+.tabela-der li.col::before { content: "   "; white-space: pre; }
+
+/* ---------- Componentes interativos ---------- */
+button { font: inherit; cursor: pointer; }
+.btn { border: 1px solid var(--azul); background: #fff; color: var(--azul); border-radius: .3em; padding: .25em .8em; font-weight: 600; font-size: .8em; }
+.btn:hover { background: var(--azul-claro); }
+.resposta[hidden] { display: none; }
+.resposta { border-left: .25em solid var(--verde); padding-left: .8em; margin-top: .5em; }
+
+.quiz { margin-bottom: .8em; }
+.quiz .pergunta { font-weight: 650; margin-bottom: .5em; }
+.quiz ol { list-style: none; padding: 0; margin: 0 0 .5em; display: grid; gap: .35em; }
+.quiz li { margin: 0; }
+.quiz li button { width: 100%; text-align: left; border: 1px solid var(--linha); background: #fff; color: var(--tinta); border-radius: .3em; padding: .4em .8em; }
+.quiz li button:hover { border-color: var(--azul); }
+.quiz li button.certa { border-color: var(--verde); background: var(--verde-claro); font-weight: 650; }
+.quiz li button.errada { border-color: var(--vermelho); background: var(--vermelho-claro); text-decoration: line-through; }
+.quiz .explica { border-left: .25em solid var(--verde); padding-left: .8em; }
+.quiz .explica[hidden] { display: none; }
+
+.timer { display: inline-flex; align-items: center; gap: .5em; font-family: var(--mono); font-weight: 700; border: 1px solid var(--laranja); color: var(--laranja); background: #fff; border-radius: 2em; padding: .15em .9em; font-size: .85em; }
+.timer.rodando { background: var(--laranja); color: #fff; }
+.timer.fim { background: var(--vermelho); border-color: var(--vermelho); color: #fff; }
+
+/* =====================================================================
+   AULAS — body.deck (um slide por vez, pensado para projetor)
+   ===================================================================== */
+body.deck { font-size: min(1.85vw, 3.3vh); overflow: hidden; height: 100vh; }
+body.deck .slide { display: none; position: absolute; inset: 0 0 2.2em 0; padding: 3.2vh 5vw 1.5vh; overflow-y: auto; }
+body.deck .slide.ativo { display: block; }
+body.deck .slide > h2 { font-size: 1.55em; border-bottom: 1px solid var(--linha); padding-bottom: .2em; margin-bottom: .45em; }
+body.deck p, body.deck ul, body.deck ol, body.deck table, body.deck pre, body.deck .caixa { margin-bottom: .55em; }
+body.deck pre { padding: .5em .8em; line-height: 1.3; }
+body.deck th, body.deck td { padding: .2em .7em; }
+body.deck li { margin-bottom: .2em; }
+body.deck .grade-quiz { display: grid; gap: 1.2em; align-items: start; }
+body.deck .grade-quiz .quiz { font-size: .9em; }
+body.deck .slide.capa { display: none; flex-direction: column; justify-content: center; }
+body.deck .slide.capa.ativo { display: flex; }
+body.deck .slide.capa h1 { font-size: 3em; margin-bottom: .2em; }
+body.deck .slide.capa .sub { font-size: 1.3em; color: var(--suave); font-family: var(--serifa); }
+body.deck .slide.capa .meta { margin-top: 2em; font-size: .8em; color: var(--suave); }
+body.deck .slide.secao { display: none; flex-direction: column; justify-content: center; background: var(--azul); color: #fff; }
+body.deck .slide.secao.ativo { display: flex; }
+body.deck .slide.secao h2 { font-size: 2.6em; border: 0; color: #fff; margin-bottom: .2em; }
+body.deck .slide.secao p { font-size: 1.15em; opacity: .85; max-width: 32em; }
+body.deck .slide.secao .bloco { font-family: var(--mono); font-size: .8em; opacity: .75; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 1em; }
+body.deck .slide.exercicio { border-left: 1vw solid var(--laranja); }
+body.deck .slide.exercicio > h2 { color: var(--laranja); }
+body.deck .slide.exercicio > h2::before { content: "Sua vez · "; font-family: var(--sem-serifa); font-size: .55em; letter-spacing: .1em; text-transform: uppercase; vertical-align: middle; }
+
+body.deck .nota-prof { display: none; }
+body.deck.mostra-notas .slide.ativo .nota-prof { display: block; position: fixed; right: 1.5vw; bottom: 3.2em; width: 34vw; max-height: 60vh; overflow: auto;
+  background: #fffbe6; border: 1px solid #d6c56a; border-radius: .4em; padding: .7em .9em; font-size: .68em; box-shadow: 0 .3em 1.2em rgba(0,0,0,.18); z-index: 5; }
+body.deck .nota-prof::before { content: "Nota do professor (tecla N)"; display: block; font-weight: 700; font-size: .85em; text-transform: uppercase; letter-spacing: .08em; color: #7a6a12; margin-bottom: .3em; }
+
+.rodape { position: fixed; left: 0; right: 0; bottom: 0; height: 2.2em; display: flex; align-items: center; gap: 1em; padding: 0 1.5vw; font-size: .62em; color: var(--suave); background: var(--papel); border-top: 1px solid var(--linha); }
+.rodape .titulo { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rodape a { color: var(--suave); text-decoration: none; }
+.rodape button { border: 1px solid var(--linha); background: #fff; border-radius: .25em; padding: .05em .6em; color: var(--suave); }
+.progresso { position: fixed; left: 0; bottom: 2.2em; height: .18em; background: var(--azul); transition: width .15s; font-size: .62em; }
+
+/* =====================================================================
+   DOCUMENTOS — body.doc (listas, referências, index): leitura e impressão
+   ===================================================================== */
+body.doc { font-size: 17px; max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.2rem 4rem; }
+body.doc.largo { max-width: 60rem; }
+body.doc header.topo { border-bottom: 2px solid var(--tinta); margin-bottom: 1.6rem; padding-bottom: .6rem; }
+body.doc header.topo .rotulo { font-size: .72rem; }
+body.doc h1 { font-size: 2rem; margin-bottom: .2em; }
+body.doc h2 { font-size: 1.3rem; margin-top: 1.8em; border-bottom: 1px solid var(--linha); padding-bottom: .2em; }
+body.doc h3 { font-size: 1.05rem; margin-top: 1.3em; font-family: var(--sem-serifa); }
+body.doc .sub { color: var(--suave); font-family: var(--serifa); font-size: 1.1rem; }
+body.doc ol.questoes { padding-left: 0; list-style: none; counter-reset: q; }
+body.doc ol.questoes > li { counter-increment: q; margin-bottom: 1.3em; padding-left: 2.3em; position: relative; break-inside: avoid; }
+body.doc ol.questoes > li::before { content: counter(q); position: absolute; left: 0; top: -.1em; font-family: var(--serifa); font-size: 1.35em; font-weight: 700; color: var(--azul); }
+body.doc .nivel { font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--suave); border: 1px solid var(--linha); border-radius: 2em; padding: 0 .6em; margin-left: .4em; white-space: nowrap; }
+body.doc .gabarito { display: none; border-left: .25em solid var(--verde); background: var(--verde-claro); padding: .5em .8em; margin-top: .5em; font-size: .92em; }
+body.doc .gabarito::before { content: "Gabarito"; display: block; font-size: .68rem; letter-spacing: .09em; text-transform: uppercase; font-weight: 700; color: var(--verde); }
+body.doc .gabarito pre { background: #fff; }
+body.doc.professor .gabarito { display: block; }
+body.doc .so-professor { display: none; }
+body.doc.professor .so-professor { display: block; }
+/* Versão do aluno (tools/gerar-aluno.py): .fora-aluno é removido do HTML; .so-aluno só aparece lá. */
+.so-aluno { display: none; }
+body.doc .linhas { border-bottom: 1px solid var(--linha); height: 1.9em; }
+body.doc nav.trilha { font-size: .82rem; color: var(--suave); margin-bottom: 1rem; }
+body.doc .cartoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem; padding: 0; list-style: none; }
+body.doc .cartoes > li { border: 1px solid var(--linha); border-radius: .4rem; padding: .9rem 1rem; background: #fff; margin: 0; }
+body.doc .cartoes h3 { margin: 0 0 .3em; font-family: var(--serifa); font-size: 1.15rem; }
+body.doc .cartoes .n { font-family: var(--mono); font-size: .75rem; color: var(--laranja); font-weight: 700; }
+body.doc .cartoes p { font-size: .88rem; color: var(--suave); }
+body.doc .cartoes .links { font-size: .88rem; display: flex; gap: 1em; flex-wrap: wrap; }
+body.doc dl.glossario dt { font-weight: 700; font-family: var(--serifa); font-size: 1.08rem; margin-top: .9em; break-after: avoid; }
+body.doc dl.glossario dt small { font-family: var(--sem-serifa); font-weight: 400; color: var(--suave); font-size: .78rem; }
+body.doc dl.glossario dd { margin: .1em 0 0; }
+
+@media (max-width: 800px) {
+  .duas, .tres, .duas.estreita-larga, .duas.larga-estreita { grid-template-columns: 1fr; }
+  body.deck { font-size: 16px; }
+}
+
+@media print {
+  html { background: #fff; }
+  body.deck { font-size: 11pt; overflow: visible; height: auto; }
+  body.deck .slide, body.deck .slide.capa, body.deck .slide.secao { display: block !important; position: static; padding: 1.2cm 1cm; overflow: visible;
+    break-after: page; background: #fff; color: var(--tinta); border-bottom: 1px solid var(--linha); }
+  body.deck .slide.secao h2 { color: var(--azul); }
+  body.deck .nota-prof { display: block; border: 1px dashed #999; padding: .4em .6em; font-size: .8em; margin-top: 1em; }
+  body.deck .resposta[hidden] { display: block; }
+  .rodape, .progresso, .btn, .timer, .nao-imprime { display: none !important; }
+  body.doc { font-size: 11pt; padding: 0; max-width: none; }
+  a { color: inherit; text-decoration: none; }
+}

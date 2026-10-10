@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 3 — Chaves e normalização na BiblioTech</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0003-chaves-e-normalizacao.html">Aula 3</a> · <a href="../reference/glossario.html">Glossário</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 3</span>
+  <h1>Chaves e normalização na BiblioTech</h1>
+  <p class="sub">Do DER ao esquema lógico: chaves, tipos, NULL e formas normais</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<h2>Parte A — Chaves</h2>
+<ol class="questoes">
+  <li>Regras do negócio: a matrícula é única por aluno; o e-mail, quando existe, é pessoal. Observe a tabela. <span class="nivel">básico</span>
+    <table>
+      <caption>Alunos</caption>
+      <tr><th>AlunoID</th><th>Nome</th><th>Matricula</th><th>Turma</th><th>Email</th></tr>
+      <tr><td>1</td><td>Bruno Almeida</td><td>240001</td><td>DS-1A</td><td>bruno@escola.com.br</td></tr>
+      <tr><td>2</td><td>Camila Rocha</td><td>240002</td><td>DS-1A</td><td>camila@escola.com.br</td></tr>
+      <tr><td>3</td><td>Diego Martins</td><td>240003</td><td>DS-1B</td><td class="nulo">NULL</td></tr>
+    </table>
+    (a) Diga se cada conjunto é superchave: {AlunoID} · {Turma} · {Matricula, Nome} · {Nome, Turma} · {Matricula}.
+    <br>(b) Quais são as chaves candidatas?
+    <br>(c) Por que {Email} <strong>não</strong> serve como chave primária?
+    
+  </li>
+  <li>Explique a diferença entre <strong>chave primária</strong> e <strong>chave estrangeira</strong> usando as tabelas Alunos e Emprestimos como exemplo. <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — Esquema lógico da BiblioTech</h2>
+<ol class="questoes" style="counter-reset: q 2">
+  <li>Transforme o DER da lista 2 em <strong>esquema lógico</strong>: desenhe uma caixa por tabela, com PK e FK marcadas. Lembre das três regras (entidade → tabela; 1:N → FK no lado N; N:N → tabela associativa). <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Na tabela que resolve o N:N entre Livros e Autores, use uma <strong>chave primária composta</strong> pelas duas FKs. O que essa escolha impede de acontecer? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Para cada coluna do seu esquema, escolha o <strong>tipo de dado</strong> e diga se é <code>NOT NULL</code>. Justifique o tipo de <code>ISBN</code> e de <code>Matricula</code>. <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Qual coluna da BiblioTech <strong>precisa</strong> aceitar NULL? O que o NULL significa nela? <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+<h2>Parte C — Normalização</h2>
+<ol class="questoes" style="counter-reset: q 6">
+  <li>Antes do sistema, a bibliotecária usava esta tabela. Aponte <strong>uma anomalia de atualização</strong> e diga qual forma normal a coluna <code>Autores</code> viola. <span class="nivel">intermediário</span>
+    <table>
+      <caption>ControleEmprestimos</caption>
+      <tr><th>EmprestimoID</th><th>AlunoNome</th><th>AlunoTurma</th><th>LivroTitulo</th><th>Autores</th><th>DataEmprestimo</th></tr>
+      <tr><td>1</td><td>Bruno Almeida</td><td>DS-1A</td><td>Sistemas de Banco de Dados</td><td>Elmasri, Navathe</td><td>2024-03-05</td></tr>
+      <tr><td>2</td><td>Bruno Almeida</td><td>DS-1A</td><td>Código Limpo</td><td>Robert C. Martin</td><td>2024-03-20</td></tr>
+      <tr><td>5</td><td>Diego Martins</td><td>DS-1B</td><td>Sistemas de Banco de Dados</td><td>Elmasri, Navathe</td><td>2024-04-02</td></tr>
+    </table>
+    
+  </li>
+  <li>Diga qual forma normal cada tabela viola e proponha a correção. <span class="nivel">intermediário</span>
+    <br>(a) <code>Livros(<u>LivroID</u>, Titulo, EditoraNome, EditoraCidade)</code> — a cidade é a da sede da editora.
+    <br>(b) <code>LivrosAutores(<u>LivroID</u>, <u>AutorID</u>, TituloDoLivro)</code>
+    
+  </li>
+  <li>Complete a frase que resume as três formas normais: "Toda coluna depende da ________, da ________ ________ e de ________ ________ da chave." <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+<h2>Parte D — Revisão das aulas 1 e 2</h2>
+<ol class="questoes" style="counter-reset: q 9">
+  <li>Sem consultar: leia em duas frases a cardinalidade abaixo e diga o tipo do relacionamento. <span class="nivel">revisão</span>
+    <div class="der"><span class="entidade">TURMAS</span><span class="liga"><b>(1,1)</b></span><span class="relacao"><span>tem</span></span><span class="liga"><b>(0,N)</b></span><span class="entidade">ALUNOS</span></div>
+    
+  </li>
+  <li>Sem consultar: cite duas coisas que o SGBD faz e que uma planilha não faz. <span class="nivel">revisão</span>
+    
+  </li>
+</ol>
+</body>
+</html>

@@ -1,0 +1,371 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 7 — Views, panorama e projeto integrador</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="deck">
+
+<section class="slide capa">
+  <span class="rotulo">UC4 · Banco de Dados · Aula 7 de 7</span>
+  <h1>Views, panorama e projeto integrador</h1>
+  <p class="sub">Guardar uma consulta, espiar o que vem depois e provar que você faz tudo sozinho</p>
+  <p class="meta">Hoje você sai com: um banco completo construído por você, do texto de requisitos às consultas com JOIN.<br>
+  Livro: capítulo 13; panorama dos capítulos 11.4, 12, 14, 15 e 16</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Revisão geral: o curso em seis perguntas</h2>
+  <div class="tres" style="font-size:.8em;gap:.2em 1.4em">
+      <div class="quiz">
+        <p class="pergunta">1. (Aula 1) Quem aplica as regras do banco?</p>
+        <ol><li>A aplicação</li><li data-certa>O SGBD</li><li>O usuário</li></ol>
+        <div class="explica">Todo acesso passa por ele.</div>
+      </div>
+      <div class="quiz">
+        <p class="pergunta">2. (Aula 2) Um N:N com atributos próprios vira…</p>
+        <ol><li>um atributo composto</li><li>uma chave primária</li><li data-certa>uma entidade associativa</li></ol>
+        <div class="explica">Como ItensVenda entre Vendas e Produtos.</div>
+      </div>
+      <div class="quiz">
+        <p class="pergunta">3. (Aula 3) Dependência transitiva viola a…</p>
+        <ol><li>1FN</li><li>2FN</li><li data-certa>3FN</li></ol>
+        <div class="explica">"Nada além da chave."</div>
+      </div>
+      <div class="quiz">
+        <p class="pergunta">4. (Aula 4) Em que ordem se criam as tabelas?</p>
+        <ol><li>Em ordem alfabética</li><li data-certa>Referenciadas antes das dependentes</li><li>Dependentes antes das referenciadas</li></ol>
+        <div class="explica">A FK só pode apontar para tabela que já existe.</div>
+      </div>
+      <div class="quiz">
+        <p class="pergunta">5. (Aula 5) <code>UPDATE</code> sem <code>WHERE</code> altera…</p>
+        <ol><li>nenhuma linha</li><li>a primeira linha</li><li data-certa>todas as linhas</li></ol>
+        <div class="explica">Por isso: SELECT com o mesmo WHERE antes.</div>
+      </div>
+      <div class="quiz">
+        <p class="pergunta">6. (Aula 6) Para listar quem <strong>não</strong> tem par, usamos…</p>
+        <ol><li><code>INNER JOIN</code> com <code>IS NULL</code></li><li data-certa><code>LEFT JOIN</code> com <code>IS NULL</code></li><li><code>LEFT JOIN</code> com <code>DISTINCT</code></li></ol>
+        <div class="explica">LEFT JOIN traz todos; o IS NULL fica com os sem par.</div>
+      </div>
+  </div>
+  
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 1 · 40 min</span>
+  <h2>Views</h2>
+  <p>Aquele JOIN de cinco tabelas deu trabalho. Vamos guardá-lo.</p>
+</section>
+
+<section class="slide">
+  <h2>O problema: reescrever sempre a mesma consulta</h2>
+<pre><code class="sql">SELECT V.VendaID, V.DataVenda, C.Nome AS Cliente, C.Cidade,
+       F.Nome AS Funcionario, P.Nome AS Produto,
+       I.Quantidade, I.PrecoUnitario,
+       I.Quantidade * I.PrecoUnitario AS Subtotal
+FROM Vendas V
+JOIN Clientes          C ON V.ClienteID     = C.ClienteID
+LEFT JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID
+JOIN ItensVenda        I ON I.VendaID       = V.VendaID
+JOIN Produtos          P ON I.ProdutoID     = P.ProdutoID;</code></pre>
+  <p>O setor financeiro quer isso filtrado por cliente. O comercial, por vendedor. O estoque, por produto.</p>
+  <p class="grande">Três pessoas, a mesma junção, três chances de errar o <code>ON</code>.</p>
+</section>
+
+<section class="slide">
+  <h2>CREATE VIEW: uma consulta com nome</h2>
+<pre><code class="sql">CREATE VIEW vw_VendasDetalhadas AS
+SELECT V.VendaID, V.DataVenda, C.Nome AS Cliente, C.Cidade,
+       F.Nome AS Funcionario, P.Nome AS Produto,
+       I.Quantidade, I.PrecoUnitario,
+       I.Quantidade * I.PrecoUnitario AS Subtotal
+FROM Vendas V
+JOIN Clientes          C ON V.ClienteID     = C.ClienteID
+LEFT JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID
+JOIN ItensVenda        I ON I.VendaID       = V.VendaID
+JOIN Produtos          P ON I.ProdutoID     = P.ProdutoID;</code></pre>
+  <p>Uma <em class="termo">view</em> (visão) é uma <strong>consulta armazenada</strong> que se comporta como uma tabela virtual.</p>
+  <ul>
+    <li>Ela <strong>não guarda dados</strong>: guarda o <code>SELECT</code>. Cada vez que é consultada, lê as tabelas de verdade.</li>
+    <li>Vendeu mais um item? A view já mostra, sem precisar atualizar nada.</li>
+  </ul>
+  <p class="fonte">Livro, cap. 13, p. 77 · <a href="https://mariadb.com/kb/en/create-view/">MariaDB: CREATE VIEW</a></p>
+</section>
+
+<section class="slide" style="font-size:.94em">
+  <h2>Usando a view como se fosse tabela</h2>
+  <div class="duas">
+    <div>
+<pre><code class="sql">SELECT VendaID, Produto, Subtotal
+FROM vw_VendasDetalhadas
+WHERE Cliente LIKE 'Mecânica%';</code></pre>
+      <table>
+        <tr><th>VendaID</th><th>Produto</th><th class="num">Subtotal</th></tr>
+        <tr><td>3</td><td>Pastilha de freio dianteira</td><td class="num">379.80</td></tr>
+        <tr><td>8</td><td>Bateria 60Ah</td><td class="num">620.00</td></tr>
+      </table>
+    </div>
+    <div>
+<pre><code class="sql">SELECT Cliente, Produto, Subtotal
+FROM vw_VendasDetalhadas
+WHERE Subtotal > 1500
+ORDER BY Subtotal DESC;</code></pre>
+      <table>
+        <tr><th>Cliente</th><th>Produto</th><th class="num">Subtotal</th></tr>
+        <tr><td>Auto Peças Curitiba Ltda</td><td>Correia de distribuição</td><td class="num">5120.50</td></tr>
+        <tr><td>Auto Peças Curitiba Ltda</td><td>Bateria 60Ah</td><td class="num">3720.00</td></tr>
+        <tr><td>Auto Peças Curitiba Ltda</td><td>Amortecedor traseiro</td><td class="num">1720.00</td></tr>
+      </table>
+    </div>
+  </div>
+  <p><code>WHERE</code>, <code>ORDER BY</code>, <code>LIMIT</code> e até <code>JOIN</code> com outras tabelas funcionam em cima da view.</p>
+<pre><code class="sql">DROP VIEW vw_VendasDetalhadas;                  -- apaga a view (os dados continuam nas tabelas)
+CREATE OR REPLACE VIEW vw_VendasDetalhadas AS … -- recria com outra definição</code></pre>
+  <p class="fonte">Livro, cap. 13, p. 78.</p>
+</section>
+
+<section class="slide">
+  <h2>Para que servem as views</h2>
+  <div class="tres">
+    <div class="caixa">
+      <span class="rotulo">Simplificar</span>
+      Esconde junções complicadas. Quem consulta não precisa conhecer as cinco tabelas.
+    </div>
+    <div class="caixa">
+      <span class="rotulo">Padronizar</span>
+      A regra (o <code>ON</code>, o cálculo do subtotal) fica escrita <strong>uma vez</strong>. Todos os relatórios usam a mesma.
+    </div>
+    <div class="caixa">
+      <span class="rotulo">Proteger</span>
+      Mostra só algumas colunas. Dá para liberar a view para um usuário sem liberar a tabela.
+    </div>
+  </div>
+<pre><code class="sql">-- Uma lista de ramais que não expõe salário nem data de contratação
+CREATE VIEW vw_ContatosFuncionarios AS
+SELECT Nome, Cargo, Telefone, Email
+FROM Funcionarios;</code></pre>
+  <div class="caixa aviso"><strong>Cuidado:</strong> view não deixa a consulta mais rápida. Ela executa o <code>SELECT</code> inteiro a cada uso. View em cima de view em cima de view pode ficar lenta e difícil de entender.</div>
+  <p class="fonte">Livro, cap. 13, p. 77–78.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Crie duas views na AutoNex</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Crie a <code>vw_VendasDetalhadas</code> do slide e depois:</p>
+  <ol>
+    <li><code>vw_EstoqueBaixo</code>: nome, preço e estoque dos produtos com menos de 50 unidades.</li>
+    <li><code>vw_VendasResumo</code>: número da venda, data, nome do cliente, nome do vendedor (ou <code>'Site'</code>) e total. Uma linha por venda.</li>
+    <li>Usando <strong>só</strong> a <code>vw_VendasResumo</code>: liste as vendas feitas pelo site.</li>
+    <li>Faça <code>UPDATE Produtos SET Estoque = 5 WHERE ProdutoID = 1;</code> e consulte de novo a <code>vw_EstoqueBaixo</code>. O que mudou? Por quê?</li>
+  </ol>
+  <div class="resposta">
+<pre><code class="sql">CREATE VIEW vw_EstoqueBaixo AS
+SELECT Nome, Preco, Estoque FROM Produtos WHERE Estoque < 50;
+
+CREATE VIEW vw_VendasResumo AS
+SELECT V.VendaID, V.DataVenda, C.Nome AS Cliente,
+       CASE WHEN F.Nome IS NULL THEN 'Site' ELSE F.Nome END AS Vendedor,
+       V.TotalVenda
+FROM Vendas V
+JOIN Clientes C ON V.ClienteID = C.ClienteID
+LEFT JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID;
+
+SELECT * FROM vw_VendasResumo WHERE Vendedor = 'Site';   -- venda 6</code></pre>
+    <p>No item 4, a Correia de distribuição passa a aparecer na <code>vw_EstoqueBaixo</code> (eram 3 linhas, viram 4). A view não guarda dados: relê a tabela a cada consulta.</p>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 2 · 30 min</span>
+  <h2>Panorama: o que existe além do nosso recorte</h2>
+  <p>Para reconhecer quando encontrar. Não precisa decorar a sintaxe.</p>
+</section>
+
+<section class="slide" style="font-size:.97em">
+  <h2>Procedures e triggers: código dentro do banco</h2>
+  <div class="duas">
+    <div>
+      <p><em class="termo">Procedure</em>: um bloco de comandos SQL com nome e parâmetros, guardado no banco e executado com <code>CALL</code>.</p>
+<pre><code class="sql">DELIMITER //
+CREATE PROCEDURE VendasDoCliente(IN pClienteID INT)
+BEGIN
+    SELECT VendaID, DataVenda, TotalVenda
+    FROM Vendas
+    WHERE ClienteID = pClienteID;
+END //
+DELIMITER ;
+
+CALL VendasDoCliente(2);</code></pre>
+      <p class="fonte">Livro, cap. 12, p. 72–76.</p>
+    </div>
+    <div>
+      <p><em class="termo">Trigger</em> (gatilho): código que o SGBD dispara <strong>sozinho</strong> antes ou depois de um <code>INSERT</code>, <code>UPDATE</code> ou <code>DELETE</code>.</p>
+<pre><code class="sql">CREATE TRIGGER trg_baixa_estoque
+AFTER INSERT ON ItensVenda
+FOR EACH ROW
+    UPDATE Produtos
+    SET Estoque = Estoque - NEW.Quantidade
+    WHERE ProdutoID = NEW.ProdutoID;</code></pre>
+      <p>Vendeu um item, o estoque baixa automaticamente.</p>
+      <p class="fonte">Livro, cap. 14, p. 79–80.</p>
+    </div>
+  </div>
+  <div class="caixa">Os dois colocam <strong>regra de negócio dentro do banco</strong>: vale para qualquer sistema que acesse, mas fica "escondida" e mais difícil de manter.</div>
+  
+</section>
+
+<section class="slide">
+  <h2>DCL: quem pode fazer o quê</h2>
+  <div class="duas">
+    <div>
+      <p><strong>Autenticação</strong>: provar quem você é (usuário e senha).<br>
+      <strong>Autorização</strong>: o que você pode fazer depois de entrar.</p>
+<pre><code class="sql">CREATE USER 'vendedor'@'localhost'
+    IDENTIFIED BY 'SenhaForte#2024';
+
+GRANT SELECT, INSERT
+    ON AutoNex.Vendas
+    TO 'vendedor'@'localhost';
+
+REVOKE INSERT
+    ON AutoNex.Vendas
+    FROM 'vendedor'@'localhost';</code></pre>
+    </div>
+    <div>
+      <table>
+        <tr><th>Comando</th><th>Faz</th></tr>
+        <tr><td><code>CREATE USER</code></td><td>cria o usuário</td></tr>
+        <tr><td><code>GRANT</code></td><td>concede permissões</td></tr>
+        <tr><td><code>REVOKE</code></td><td>retira permissões</td></tr>
+      </table>
+      <div class="caixa ideia">
+        <span class="rotulo">Princípio do menor privilégio</span>
+        Cada usuário (e cada sistema) recebe <strong>só</strong> as permissões de que precisa. É a confidencialidade da aula 1, na prática.
+      </div>
+      <div class="caixa aviso">No laboratório usamos <code>root</code> sem senha. Em produção, isso <strong>nunca</strong> acontece.</div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.4, p. 69–70.</p>
+</section>
+
+<section class="slide">
+  <h2>Big Data e NoSQL</h2>
+  <div class="duas">
+    <div>
+      <p><em class="termo">Big Data</em>: volumes de dados grandes demais para as ferramentas tradicionais. Os 5 Vs: <strong>Volume, Velocidade, Variedade, Veracidade, Valor</strong>.</p>
+      <p><em class="termo">NoSQL</em>: bancos não relacionais, criados para escalar em muitos servidores e aceitar dados sem esquema fixo.</p>
+      <table>
+        <tr><th>Modelo</th><th>Guarda</th><th>Exemplo</th></tr>
+        <tr><td>Chave-valor</td><td>pares simples</td><td>Redis</td></tr>
+        <tr><td>Documentos</td><td>JSON flexível</td><td>MongoDB</td></tr>
+        <tr><td>Colunas</td><td>famílias de colunas</td><td>Cassandra</td></tr>
+        <tr><td>Grafos</td><td>nós e arestas</td><td>Neo4j</td></tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tr><th></th><th>Relacional</th><th>Não relacional</th></tr>
+        <tr><td><strong>Esquema</strong></td><td>rígido, definido antes</td><td>flexível</td></tr>
+        <tr><td><strong>Escala</strong></td><td>vertical (máquina maior)</td><td>horizontal (mais máquinas)</td></tr>
+        <tr><td><strong>Consistência</strong></td><td>ACID</td><td>BASE (consistência eventual)</td></tr>
+      </table>
+      <div class="caixa">
+        <span class="rotulo">Não é substituição</span>
+        Sistema de vendas, financeiro, RH: relacional continua sendo a escolha padrão. NoSQL entra quando o volume ou a variedade dos dados pede. Muitas empresas usam os dois.
+      </div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 15 e 16, p. 81–92 (Sadalage &amp; Fowler, 2013). Cassandra e Neo4j são exemplos acrescentados; o livro cita Redis, DynamoDB, MongoDB e CouchDB.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Intervalo · 15 min</span>
+  <h2>Na volta: o projeto integrador</h2>
+  <p>Tudo o que fizemos em seis aulas, em um problema novo, sozinho.</p>
+</section>
+
+<section class="slide">
+  <h2>Projeto integrador: TecnoCursos</h2>
+  <div class="caixa">
+    <p>"A <strong>TecnoCursos</strong> oferece cursos livres de tecnologia. Cada <strong>curso</strong> tem nome, carga horária e valor. Um curso é oferecido em várias <strong>turmas</strong>; cada turma tem data de início, turno (manhã, tarde ou noite) e é ministrada por um <strong>instrutor</strong>. Dos instrutores guardamos nome, e-mail e especialidade; um instrutor pode ministrar várias turmas. Os <strong>alunos</strong> têm nome, CPF, e-mail e telefone (opcional). Um aluno pode se matricular em várias turmas, e uma turma tem vários alunos; de cada <strong>matrícula</strong> guardamos a data e a nota final, que só é lançada no fim do curso."</p>
+  </div>
+  <p><span class="timer" data-min="130"></span> &nbsp;Individual. Pode consultar suas anotações, a <a href="../reference/cola-sql.html">cola de SQL</a> e o <a href="../reference/glossario.html">glossário</a>.</p>
+  <p>Enunciado completo para imprimir ou abrir no computador do aluno: <a href="../listas/projeto-integrador.html">listas/projeto-integrador.html</a></p>
+</section>
+
+<section class="slide">
+  <h2>As cinco entregas</h2>
+  <table>
+    <tr><th>#</th><th>Entrega</th><th>Aula</th><th>Tempo sugerido</th></tr>
+    <tr><td>1</td><td><strong>DER</strong> no papel: entidades, atributos, identificadores, relacionamentos com (mín,máx)</td><td>2</td><td>25 min</td></tr>
+    <tr><td>2</td><td><strong>Esquema lógico</strong>: tabelas, PK, FK, tipos, NOT NULL; conferido até a 3FN</td><td>3</td><td>15 min</td></tr>
+    <tr><td>3</td><td><strong>DDL</strong>: banco <code>TecnoCursos</code> criado, com todas as restrições</td><td>4</td><td>25 min</td></tr>
+    <tr><td>4</td><td><strong>DML</strong>: dados inseridos (mínimo: 4 cursos, 3 instrutores, 4 turmas, 5 alunos, 7 matrículas)</td><td>5</td><td>20 min</td></tr>
+    <tr><td>5</td><td><strong>Consultas</strong>: as 6 perguntas do enunciado + 1 view</td><td>5, 6 e 7</td><td>40 min</td></tr>
+  </table>
+  <div class="caixa ideia">Entregue um único arquivo <code>tecnocursos_seunome.sql</code> com tudo, na ordem em que deve ser executado, mais a foto do DER. Teste: rodar o arquivo num banco vazio precisa funcionar de primeira.</div>
+  
+</section>
+
+<section class="slide">
+  <h2>As perguntas do dono da TecnoCursos</h2>
+  <ol>
+    <li>Quais cursos têm carga horária de 60 horas ou mais? Do mais caro para o mais barato.</li>
+    <li>Liste todas as turmas com o nome do curso e o nome do instrutor, em ordem de data de início.</li>
+    <li>Quais alunos estão em uma turma à sua escolha, com suas notas, da maior para a menor?</li>
+    <li>Quais matrículas ainda estão sem nota? Mostre o nome do aluno e o nome do curso.</li>
+    <li>Quais alunos nunca se matricularam em nenhuma turma?</li>
+    <li>Para cada matrícula: aluno, curso, nota e a situação — <strong>'Aprovado'</strong> (nota ≥ 6), <strong>'Reprovado'</strong> (nota &lt; 6) ou <strong>'Cursando'</strong> (sem nota).</li>
+  </ol>
+  <p><strong>View:</strong> transforme a consulta 6 na view <code>vw_Boletim</code> e use-a para listar só os aprovados.</p>
+  <div class="caixa aviso">Seus dados precisam permitir todas as respostas: pelo menos um aluno sem matrícula, pelo menos uma matrícula sem nota, pelo menos uma nota abaixo de 6.</div>
+</section>
+
+<section class="slide">
+  <h2>Como o projeto será avaliado</h2>
+  <table>
+    <tr><th>Critério</th><th>O que observo</th><th class="num">Peso</th></tr>
+    <tr><td>Modelagem</td><td>Entidades certas, N:N resolvido com tabela associativa, cardinalidades coerentes com o texto</td><td class="num">25%</td></tr>
+    <tr><td>Esquema e DDL</td><td>PKs, FKs explícitas, tipos adequados, NOT NULL e UNIQUE onde o texto exige; script roda sem erro</td><td class="num">25%</td></tr>
+    <tr><td>Dados</td><td>Inserções na ordem certa, respeitando as FKs; dados cobrem os casos pedidos</td><td class="num">15%</td></tr>
+    <tr><td>Consultas</td><td>Resultado correto; JOIN com ON adequado; LEFT JOIN e CASE onde necessário</td><td class="num">30%</td></tr>
+    <tr><td>Organização</td><td>Arquivo único, legível, com comentários separando as partes</td><td class="num">5%</td></tr>
+  </table>
+  <p class="fonte">Os pesos são uma sugestão: ajuste aos critérios de avaliação da sua unidade.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>O que você leva deste curso</h2>
+  <div class="duas">
+    <div>
+      <table>
+        <tr><th>Você recebe…</th><th>…e entrega</th></tr>
+        <tr><td>Um texto de requisitos</td><td>um DER</td></tr>
+        <tr><td>Um DER</td><td>tabelas normalizadas com chaves</td></tr>
+        <tr><td>Um esquema lógico</td><td>um script <code>CREATE TABLE</code></td></tr>
+        <tr><td>Um banco vazio</td><td>dados íntegros</td></tr>
+        <tr><td>Uma pergunta do negócio</td><td>um <code>SELECT</code> com <code>JOIN</code></td></tr>
+      </table>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Para continuar</span>
+        <ul>
+          <li>Agregações: <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>, <code>GROUP BY</code> — o próximo passo natural.</li>
+          <li>Procedures, triggers e transações.</li>
+          <li>Ligar o banco a uma aplicação.</li>
+          <li><a href="https://sqlbolt.com/">SQLBolt</a> para praticar; <a href="https://pt.stackoverflow.com/questions/tagged/sql">Stack Overflow em Português</a> para tirar dúvidas reais.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <p><strong>Lista 7 (revisão geral):</strong> <a href="../listas/lista-07.html">listas/lista-07.html</a> · <a href="../reference/glossario.html">glossário</a> · <a href="../reference/cola-sql.html">cola de SQL</a> · <a href="0006-join.html">← Aula 6</a></p>
+  <p class="fonte">Dúvidas sobre o material? Pergunte ao professor.</p>
+</section>
+
+</body>
+</html>

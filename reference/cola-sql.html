@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cola de SQL — MariaDB no XAMPP</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+<style>
+  body.doc pre { font-size: .92rem; break-inside: avoid; }
+  body.doc h2 { break-after: avoid; }
+</style>
+</head>
+<body class="doc largo">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="glossario.html">Glossário</a> · <a href="autonex.sql">autonex.sql</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Referência</span>
+  <h1>Cola de SQL</h1>
+  <p class="sub">Tudo o que o curso usa, na sintaxe do MariaDB (XAMPP)</p>
+</header>
+
+<div class="duas">
+<div>
+
+<h2>Banco de dados <span class="nivel">aula 4</span></h2>
+<pre><code class="sql">CREATE DATABASE AutoNex
+    CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE AutoNex;
+DROP DATABASE IF EXISTS AutoNex;
+SHOW DATABASES;
+SHOW TABLES;</code></pre>
+
+<h2>Criar tabela <span class="nivel">aula 4</span></h2>
+<pre><code class="sql">CREATE TABLE Vendas (
+    VendaID       INT AUTO_INCREMENT PRIMARY KEY,
+    ClienteID     INT           NOT NULL,
+    FuncionarioID INT           NULL,
+    DataVenda     DATE          NOT NULL,
+    TotalVenda    DECIMAL(10,2) NOT NULL DEFAULT 0,
+    CONSTRAINT fk_vendas_cliente
+        FOREIGN KEY (ClienteID)
+        REFERENCES Clientes(ClienteID)
+);
+
+DESCRIBE Vendas;
+SHOW CREATE TABLE Vendas;</code></pre>
+
+<table>
+  <tr><th>Tipo</th><th>Guarda</th></tr>
+  <tr><td><code>INT</code></td><td>inteiro</td></tr>
+  <tr><td><code>DECIMAL(10,2)</code></td><td>número exato com 2 casas (dinheiro)</td></tr>
+  <tr><td><code>VARCHAR(n)</code></td><td>texto até <em>n</em> caracteres</td></tr>
+  <tr><td><code>CHAR(n)</code></td><td>texto de tamanho fixo (CNPJ, UF)</td></tr>
+  <tr><td><code>TEXT</code></td><td>texto longo</td></tr>
+  <tr><td><code>DATE</code></td><td>data <code>'AAAA-MM-DD'</code></td></tr>
+</table>
+
+<table>
+  <tr><th>Restrição</th><th>Garante</th></tr>
+  <tr><td><code>PRIMARY KEY</code></td><td>único e não nulo</td></tr>
+  <tr><td><code>AUTO_INCREMENT</code></td><td>numeração automática</td></tr>
+  <tr><td><code>NOT NULL</code></td><td>valor obrigatório</td></tr>
+  <tr><td><code>UNIQUE</code></td><td>sem repetição</td></tr>
+  <tr><td><code>DEFAULT v</code></td><td>valor padrão</td></tr>
+  <tr><td><code>FOREIGN KEY</code></td><td>valor existe na outra tabela</td></tr>
+</table>
+
+<h2>Alterar e apagar estrutura <span class="nivel">aula 4</span></h2>
+<pre><code class="sql">ALTER TABLE Produtos ADD PesoKg DECIMAL(8,3);
+ALTER TABLE Produtos MODIFY Nome VARCHAR(150) NOT NULL;
+ALTER TABLE Produtos DROP COLUMN PesoKg;
+ALTER TABLE Vendas ADD CONSTRAINT fk_nome
+    FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID);
+
+DROP TABLE IF EXISTS ItensVenda;  -- dependentes primeiro</code></pre>
+
+<h2>Inserir, alterar, apagar dados <span class="nivel">aula 5</span></h2>
+<pre><code class="sql">INSERT INTO Produtos (Nome, Preco, Estoque)
+VALUES ('Filtro de óleo', 38.90, 500),
+       ('Vela de ignição', 24.50, 800);
+
+UPDATE Produtos
+SET Preco = 42.50, Estoque = Estoque + 30
+WHERE ProdutoID = 3;
+
+DELETE FROM Produtos
+WHERE ProdutoID = 8;</code></pre>
+<div class="caixa aviso"><code>UPDATE</code> e <code>DELETE</code> sem <code>WHERE</code> atingem <strong>todas</strong> as linhas. Rode antes um <code>SELECT</code> com o mesmo <code>WHERE</code>.</div>
+
+</div>
+<div>
+
+<h2>Consultar <span class="nivel">aula 5</span></h2>
+<pre><code class="sql">SELECT Nome, Preco * Estoque AS ValorEmEstoque
+FROM Produtos
+WHERE Preco > 100 AND Estoque > 0
+ORDER BY ValorEmEstoque DESC
+LIMIT 3;</code></pre>
+
+<table>
+  <tr><th>Filtro</th><th>Exemplo</th></tr>
+  <tr><td>Comparação</td><td><code>Preco &gt;= 100</code> &nbsp; <code>Estado &lt;&gt; 'PR'</code></td></tr>
+  <tr><td>Lógicos</td><td><code>AND</code> &nbsp; <code>OR</code> &nbsp; <code>NOT</code> &nbsp; (use parênteses)</td></tr>
+  <tr><td>Faixa</td><td><code>Preco BETWEEN 100 AND 500</code></td></tr>
+  <tr><td>Lista</td><td><code>Cargo IN ('Vendedor','Vendedora')</code></td></tr>
+  <tr><td>Texto</td><td><code>Nome LIKE 'P%'</code> &nbsp; <code>'%freio%'</code> &nbsp; <code>'_ateria%'</code></td></tr>
+  <tr><td>Vazio</td><td><code>Email IS NULL</code> &nbsp; <code>IS NOT NULL</code></td></tr>
+  <tr><td>Sem repetir</td><td><code>SELECT DISTINCT Cidade</code></td></tr>
+  <tr><td>Juntar texto</td><td><code>CONCAT(Nome, ' - ', Cargo)</code></td></tr>
+</table>
+
+<h2>JOIN <span class="nivel">aula 6</span></h2>
+<pre><code class="sql">-- só linhas com par dos dois lados
+SELECT V.VendaID, C.Nome AS Cliente, P.Nome AS Produto
+FROM Vendas V
+JOIN Clientes   C ON V.ClienteID = C.ClienteID
+JOIN ItensVenda I ON I.VendaID   = V.VendaID
+JOIN Produtos   P ON I.ProdutoID = P.ProdutoID;
+
+-- todas as linhas da esquerda
+SELECT V.VendaID, F.Nome
+FROM Vendas V
+LEFT JOIN Funcionarios F
+       ON V.FuncionarioID = F.FuncionarioID;
+
+-- quem NÃO tem par
+SELECT C.Nome
+FROM Clientes C
+LEFT JOIN Vendas V ON V.ClienteID = C.ClienteID
+WHERE V.VendaID IS NULL;</code></pre>
+<p>Regra do <code>ON</code>: <strong>FK = PK</strong>. Linhas demais no resultado? <code>ON</code> faltando ou errado.</p>
+
+<h2>CASE e subconsulta <span class="nivel">aula 6</span></h2>
+<pre><code class="sql">SELECT VendaID, TotalVenda,
+       CASE WHEN TotalVenda < 1000 THEN 'Pequena'
+            WHEN TotalVenda <= 5000 THEN 'Média'
+            ELSE 'Grande' END AS Categoria
+FROM Vendas;
+
+SELECT Nome FROM Clientes
+WHERE ClienteID IN (SELECT ClienteID FROM Vendas
+                    WHERE TotalVenda > 5000);</code></pre>
+
+<h2>View <span class="nivel">aula 7</span></h2>
+<pre><code class="sql">CREATE VIEW vw_EstoqueBaixo AS
+SELECT Nome, Preco, Estoque
+FROM Produtos WHERE Estoque < 50;
+
+SELECT * FROM vw_EstoqueBaixo;
+DROP VIEW vw_EstoqueBaixo;</code></pre>
+
+</div>
+</div>
+
+<h2>Particularidades do MariaDB no XAMPP</h2>
+<table>
+  <tr><th>Situação</th><th>O que acontece</th><th>O que fazer</th></tr>
+  <tr><td>FK escrita na linha da coluna: <code>ClienteID INT REFERENCES Clientes(ClienteID)</code></td><td>Na versão 10.4 o comando roda, mas nenhuma FK é criada.</td><td>Escrever <code>FOREIGN KEY (…) REFERENCES …</code> em linha separada.</td></tr>
+  <tr><td>Concatenar com <code>||</code></td><td>Por padrão, <code>||</code> é o operador lógico OR.</td><td>Usar <code>CONCAT()</code>.</td></tr>
+  <tr><td><code>FULL OUTER JOIN</code></td><td>Não existe: erro de sintaxe.</td><td>Usar <code>LEFT JOIN</code> ou <code>RIGHT JOIN</code>.</td></tr>
+  <tr><td>Comparar com <code>= NULL</code></td><td>O resultado é NULL; nenhuma linha passa.</td><td>Usar <code>IS NULL</code>.</td></tr>
+  <tr><td>Decimal com vírgula: <code>550,25</code></td><td>A vírgula separa valores.</td><td>Usar ponto: <code>550.25</code>.</td></tr>
+  <tr><td>Nomes de tabela no Windows</td><td>Aparecem em minúsculas (<code>itensvenda</code>).</td><td>Normal; os comandos funcionam com qualquer caixa.</td></tr>
+  <tr><td>Aspas copiadas de PDF: <code>‘texto’</code></td><td>Erro de sintaxe.</td><td>Digitar aspas simples retas: <code>'texto'</code>.</td></tr>
+</table>
+<p class="fonte">Fontes: <a href="https://mariadb.com/kb/en/foreign-keys/">Foreign Keys</a> · <a href="https://mariadb.com/kb/en/sql-mode/">SQL_MODE</a> · <a href="https://mariadb.com/kb/en/join-syntax/">JOIN Syntax</a> · <a href="https://mariadb.com/kb/en/null-values/">NULL Values</a> · <a href="https://mariadb.com/kb/en/identifier-case-sensitivity/">Identifier Case-sensitivity</a> (MariaDB Knowledge Base).</p>
+</body>
+</html>

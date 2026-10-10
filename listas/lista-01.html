@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 1 — Da planilha ao banco de dados</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0001-do-arquivo-ao-banco.html">Aula 1</a> · <a href="../reference/glossario.html">Glossário</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 1</span>
+  <h1>Da planilha ao banco de dados</h1>
+  <p class="sub">Conceitos de banco, SGBD, modelo relacional e primeiros comandos</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<h2>Parte A — Conceitos</h2>
+<ol class="questoes">
+  <li>Explique, com suas palavras, a diferença entre <strong>banco de dados</strong> e <strong>SGBD</strong>. Dê um exemplo de cada. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Uma escola controla as notas dos alunos numa planilha compartilhada por todos os professores. Dê <strong>um exemplo concreto</strong> de cada problema nessa planilha: (a) redundância, (b) inconsistência, (c) falta de regras, (d) acesso simultâneo. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Classifique cada situação como quebra de <strong>confidencialidade</strong>, <strong>integridade</strong> ou <strong>disponibilidade</strong>: <span class="nivel">básico</span>
+    <br>(a) Um aluno descobriu a senha do sistema e alterou a própria nota.
+    <br>(b) O sistema de matrículas ficou fora do ar no último dia do prazo.
+    <br>(c) A lista de CPFs dos alunos foi publicada num grupo de mensagens.
+    
+  </li>
+  <li>Observe a tabela e responda. <span class="nivel">básico</span>
+    <table>
+      <caption>Alunos</caption>
+      <tr><th>Matricula</th><th>Nome</th><th>Turma</th><th>DataNascimento</th></tr>
+      <tr><td>240001</td><td>Bruno Almeida</td><td>DS-1A</td><td>2007-05-12</td></tr>
+      <tr><td>240002</td><td>Camila Rocha</td><td>DS-1A</td><td>2006-11-30</td></tr>
+      <tr><td>240003</td><td>Diego Martins</td><td>DS-1B</td><td>2007-02-08</td></tr>
+      <tr><td>240004</td><td>Elisa Nogueira</td><td>DS-1B</td><td>2007-08-21</td></tr>
+    </table>
+    (a) Qual é a relação? (b) Quantos atributos e qual o grau? (c) Quantas tuplas? (d) Qual o domínio de <code>DataNascimento</code>? (e) Qual atributo identifica cada tupla? (f) Escreva o esquema na notação <code>Nome(atributos)</code>.
+    
+  </li>
+  <li>Por que, neste curso, digitamos os comandos SQL em vez de criar tabelas clicando nos botões do phpMyAdmin? <span class="nivel">reflexão</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — Prática no XAMPP</h2>
+<ol class="questoes" style="counter-reset: q 5">
+  <li>Crie um banco chamado <code>Lista01</code> e, dentro dele, a tabela abaixo. Entregue o comando. <span class="nivel">prática</span>
+    <br><code>Livros(<u>LivroID</u> inteiro, Titulo texto até 150, AnoPublicacao inteiro, Exemplares inteiro)</code>
+    
+  </li>
+  <li>Insira três livros à sua escolha e escreva duas consultas: uma que mostre todas as colunas e outra que mostre só o título e o número de exemplares. <span class="nivel">prática</span>
+    
+  </li>
+  <li>Execute os dois comandos abaixo, copie a mensagem que o SGBD devolveu e explique, com os termos da aula, por que cada um foi recusado. <span class="nivel">prática</span>
+<pre><code class="sql">INSERT INTO Livros (LivroID, Titulo, AnoPublicacao, Exemplares)
+VALUES (1, 'Outro livro', 2020, 1);
+
+INSERT INTO Livros (LivroID, Titulo, AnoPublicacao, Exemplares)
+VALUES (9, 'Mais um livro', 'dois mil', 1);</code></pre>
+    
+  </li>
+  <li>Exporte o banco <code>Lista01</code> pela aba <strong>Exportar</strong> e abra o arquivo <code>.sql</code> gerado num editor de texto. Quais comandos que você conhece aparecem lá dentro? <span class="nivel">desafio</span>
+    
+  </li>
+</ol>
+</body>
+</html>

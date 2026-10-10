@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 2 — Modelagem ER da BiblioTech</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0002-modelagem-er.html">Aula 2</a> · <a href="../reference/glossario.html">Glossário</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 2</span>
+  <h1>Modelagem ER da BiblioTech</h1>
+  <p class="sub">Entidades, atributos, relacionamentos e cardinalidades</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<div class="caixa">
+  <span class="rotulo">O minimundo — guarde este texto, ele vale até a lista 7</span>
+  <p>"A biblioteca da escola, a <strong>BiblioTech</strong>, cadastra os alunos com nome, número de matrícula, turma e e-mail. Os livros têm título, ISBN, ano de publicação e número de exemplares. Cada livro foi escrito por um ou mais autores, e um autor pode ter escrito vários livros; dos autores guardamos nome e nacionalidade. Os alunos fazem empréstimos: cada empréstimo é de um aluno e de um livro, tem a data do empréstimo e a data da devolução, que só é preenchida quando o livro volta."</p>
+</div>
+
+<h2>Parte A — A BiblioTech</h2>
+<ol class="questoes">
+  <li>Liste as <strong>entidades</strong> do minimundo. Para cada uma, escreva os atributos e sublinhe o identificador. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Para cada par, escreva o relacionamento e as cardinalidades (mín,máx) <strong>nos dois sentidos</strong>, com a frase de leitura. <span class="nivel">intermediário</span>
+    <br>(a) Alunos e Empréstimos &nbsp; (b) Livros e Empréstimos &nbsp; (c) Livros e Autores
+    
+  </li>
+  <li>Qual relacionamento é N:N? Ele tem atributos próprios? O que vai acontecer com ele quando virar tabela? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Desenhe o <strong>DER completo</strong> da BiblioTech, com retângulos, losangos, identificadores e cardinalidades. <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>A bibliotecária pediu uma mudança: "Agora cada <strong>exemplar físico</strong> tem um código de tombo e um estado de conservação, e o empréstimo é de um exemplar específico." O que muda no seu DER? <span class="nivel">desafio</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — Treino de cardinalidade</h2>
+<ol class="questoes" style="counter-reset: q 5">
+  <li>Diga o tipo (1:1, 1:N ou N:N) e justifique com as duas frases de leitura. <span class="nivel">básico</span>
+    <br>(a) Departamento e Funcionário (cada funcionário trabalha em um departamento).
+    <br>(b) Aluno e Disciplina.
+    <br>(c) Pessoa e CPF.
+    <br>(d) Pedido e Entregador (cada pedido é levado por um entregador).
+    
+  </li>
+  <li>Num sistema de streaming, um usuário avalia filmes com uma nota de 1 a 5. Onde fica o atributo <strong>nota</strong>: em Usuários, em Filmes ou em outro lugar? Explique. <span class="nivel">intermediário</span>
+    
+  </li>
+</ol>
+
+<h2>Parte C — Revisão da aula 1</h2>
+<ol class="questoes" style="counter-reset: q 7">
+  <li>Sem consultar o material, complete: no modelo relacional, a tabela se chama ________, a linha se chama ________, a coluna se chama ________ e o conjunto de valores permitidos numa coluna é o seu ________. <span class="nivel">revisão</span>
+    
+  </li>
+</ol>
+</body>
+</html>

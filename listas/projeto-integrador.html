@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projeto integrador — TecnoCursos</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0007-views-e-projeto.html">Aula 7</a> · <a href="../reference/cola-sql.html">Cola de SQL</a> · <a href="../reference/glossario.html">Glossário</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Projeto integrador</span>
+  <h1>TecnoCursos</h1>
+  <p class="sub">Do texto de requisitos ao banco funcionando, sozinho</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<h2>O minimundo</h2>
+<div class="caixa">
+  <p>"A <strong>TecnoCursos</strong> oferece cursos livres de tecnologia. Cada curso tem nome, carga horária e valor. Um curso é oferecido em várias turmas; cada turma tem data de início, turno (manhã, tarde ou noite) e é ministrada por um instrutor. Dos instrutores guardamos nome, e-mail e especialidade; um instrutor pode ministrar várias turmas. Os alunos têm nome, CPF, e-mail e telefone (opcional). Um aluno pode se matricular em várias turmas, e uma turma tem vários alunos; de cada matrícula guardamos a data e a nota final, que só é lançada no fim do curso."</p>
+</div>
+
+<h2>O que entregar</h2>
+<ol>
+  <li><strong>DER</strong> (no papel, fotografado): entidades, atributos, identificadores, relacionamentos e cardinalidades (mín,máx) dos dois lados.</li>
+  <li><strong>Esquema lógico</strong>: uma caixa por tabela, com PK, FK, tipo de cada coluna e indicação de NOT NULL. Conferido até a 3FN.</li>
+  <li><strong>DDL</strong>: criação do banco <code>TecnoCursos</code> e das tabelas, com todas as restrições.</li>
+  <li><strong>DML</strong>: inserção de, no mínimo, 4 cursos, 3 instrutores, 4 turmas, 5 alunos e 7 matrículas. Os dados precisam incluir: um aluno sem matrícula, uma matrícula sem nota e uma nota abaixo de 6.</li>
+  <li><strong>Consultas</strong>: as seis perguntas abaixo e a view.</li>
+</ol>
+<p>Itens 3 a 5 em <strong>um único arquivo</strong> <code>tecnocursos_seunome.sql</code>, com comentários (<code>-- </code>) separando as partes. O arquivo precisa rodar de primeira num banco vazio.</p>
+
+<h2>As perguntas</h2>
+<ol class="questoes">
+  <li>Quais cursos têm carga horária de 60 horas ou mais? Do mais caro para o mais barato.</li>
+  <li>Liste todas as turmas com o nome do curso e o nome do instrutor, em ordem de data de início.</li>
+  <li>Quais alunos estão em uma turma à sua escolha, com suas notas, da maior para a menor?</li>
+  <li>Quais matrículas ainda estão sem nota? Mostre o nome do aluno e o nome do curso.</li>
+  <li>Quais alunos nunca se matricularam em nenhuma turma?</li>
+  <li>Para cada matrícula: aluno, curso, nota e a situação — 'Aprovado' (nota ≥ 6), 'Reprovado' (nota &lt; 6) ou 'Cursando' (sem nota).</li>
+  <li><strong>View:</strong> transforme a consulta 6 na view <code>vw_Boletim</code> e use-a para listar só os aprovados.</li>
+</ol>
+
+<h2>Como será avaliado</h2>
+<table>
+  <tr><th>Critério</th><th>O que é observado</th><th class="num">Peso</th></tr>
+  <tr><td>Modelagem</td><td>Entidades certas, N:N resolvido com tabela associativa, cardinalidades coerentes com o texto</td><td class="num">25%</td></tr>
+  <tr><td>Esquema e DDL</td><td>PKs, FKs explícitas, tipos adequados, NOT NULL e UNIQUE onde o texto exige; script roda sem erro</td><td class="num">25%</td></tr>
+  <tr><td>Dados</td><td>Inserções na ordem certa, respeitando as FKs; dados cobrem os casos pedidos</td><td class="num">15%</td></tr>
+  <tr><td>Consultas</td><td>Resultado correto; JOIN com ON adequado; LEFT JOIN e CASE onde necessário</td><td class="num">30%</td></tr>
+  <tr><td>Organização</td><td>Arquivo único, legível, comentado</td><td class="num">5%</td></tr>
+</table>
+
+</body>
+</html>

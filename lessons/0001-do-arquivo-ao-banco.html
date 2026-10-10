@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 1 — Da planilha ao banco de dados</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="deck">
+
+<section class="slide capa">
+  <span class="rotulo">UC4 · Banco de Dados · Aula 1 de 7</span>
+  <h1>Da planilha ao banco de dados</h1>
+  <p class="sub">O que é um banco, quem cuida dele e a nossa primeira tabela</p>
+  <p class="meta">Hoje você sai com: um banco <code>AutoNex</code> criado no seu computador, com uma tabela e dados dentro.<br>
+  Livro: capítulos 1 a 7 · Teclas: <kbd>→</kbd> avança · <kbd>F</kbd> tela cheia</p>
+  
+</section>
+
+<section class="slide">
+  <h2>O caminho das 7 aulas</h2>
+  <table>
+    <tr><th>Aula</th><th>Tema</th><th>Você sai sabendo…</th></tr>
+    <tr><td class="pk">1</td><td>Da planilha ao banco</td><td>criar um banco e uma tabela</td></tr>
+    <tr><td>2</td><td>Modelagem ER</td><td>desenhar entidades e relacionamentos</td></tr>
+    <tr><td>3</td><td>Chaves e normalização</td><td>transformar o desenho em tabelas sem redundância</td></tr>
+    <tr><td>4</td><td>DDL</td><td>criar as tabelas com PK e FK</td></tr>
+    <tr><td>5</td><td>DML e SELECT</td><td>inserir, alterar, apagar e consultar</td></tr>
+    <tr><td>6</td><td>JOIN</td><td>consultar várias tabelas de uma vez</td></tr>
+    <tr><td>7</td><td>Views e projeto</td><td>construir um banco do zero, sozinho</td></tr>
+  </table>
+  <p>Um cenário nos acompanha o curso todo: a <strong>AutoNex</strong>, distribuidora de autopeças do livro.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 1 · 35 min</span>
+  <h2>Por que não guardar tudo numa planilha?</h2>
+  <p>Antes de aprender a ferramenta, precisamos sentir o problema que ela resolve.</p>
+</section>
+
+<section class="slide">
+  <h2>A planilha de vendas da AutoNex</h2>
+  <table>
+    <caption>vendas.xlsx</caption>
+    <tr><th>Data</th><th>Cliente</th><th>CNPJ</th><th>Cidade</th><th>Produto</th><th class="num">Qtd</th><th class="num">Preço</th><th>Vendedor</th></tr>
+    <tr><td>04/03</td><td>BS Serviços Automotivos</td><td>48996633000128</td><td>Bauru</td><td>Pneu X</td><td class="num">4</td><td class="num">350,00</td><td>Agata</td></tr>
+    <tr><td>04/03</td><td>BS Serviços Automotivos</td><td>48996633000128</td><td>Bauru</td><td>Filtro de óleo</td><td class="num">2</td><td class="num">38,90</td><td>Agata</td></tr>
+    <tr><td>11/03</td><td>Auto Peças Curitiba</td><td>11222000133</td><td>Curitiba</td><td>Correia</td><td class="num">10</td><td class="num">512,05</td><td>Joaquim</td></tr>
+    <tr><td>21/05</td><td>BS Serv. Automotivo</td><td>48996633000128</td><td>Baurú</td><td>Pneu X</td><td class="num">2</td><td class="num">355,00</td><td></td></tr>
+    <tr><td>03/06</td><td>Retífica Carmen</td><td>44555000166</td><td>Maringá</td><td>correia dist.</td><td class="num">dois</td><td class="num">512,05</td><td>Joaquin</td></tr>
+  </table>
+  <p class="grande">Olhe por 1 minuto. O que pode dar errado aqui?</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Os quatro problemas da planilha</h2>
+  <div class="duas">
+    <div>
+      <div class="caixa"><span class="rotulo">1 · Redundância</span>O CNPJ e a cidade do cliente se repetem a cada venda.</div>
+      <div class="caixa"><span class="rotulo">2 · Inconsistência</span>"BS Serviços Automotivos" e "BS Serv. Automotivo" são o mesmo cliente? O computador acha que não.</div>
+    </div>
+    <div>
+      <div class="caixa"><span class="rotulo">3 · Falta de regras</span>Nada impede escrever "dois" na quantidade ou deixar o vendedor vazio.</div>
+      <div class="caixa"><span class="rotulo">4 · Acesso simultâneo</span>Dois vendedores salvando o arquivo ao mesmo tempo: a última gravação apaga a outra.</div>
+    </div>
+  </div>
+  <p>Um banco de dados existe para resolver exatamente esses quatro pontos.</p>
+</section>
+
+<section class="slide">
+  <h2>O que é um banco de dados</h2>
+  <p class="grande">Um conjunto de <em class="termo">dados estruturados</em>, organizados conforme uma <em class="termo">estrutura predefinida</em>.</p>
+  <p>Ele precisa permitir quatro operações:</p>
+  <div class="tres" style="grid-template-columns: repeat(4,1fr)">
+    <div class="caixa centro"><strong>Inserir</strong><br><span class="fonte">cadastrar um cliente</span></div>
+    <div class="caixa centro"><strong>Ler</strong><br><span class="fonte">listar as vendas de março</span></div>
+    <div class="caixa centro"><strong>Alterar</strong><br><span class="fonte">mudar o preço de um produto</span></div>
+    <div class="caixa centro"><strong>Excluir</strong><br><span class="fonte">remover um cadastro</span></div>
+  </div>
+  <p>"Estrutura predefinida" é a parte que a planilha não tem: <strong>primeiro</strong> dizemos que quantidade é um número inteiro, <strong>depois</strong> guardamos os dados.</p>
+  <p class="fonte">Livro, cap. 5, p. 19.</p>
+</section>
+
+<section class="slide">
+  <h2>De onde isso veio</h2>
+  <table>
+    <tr><th>Quando</th><th>O que aconteceu</th></tr>
+    <tr><td>Anos 1960</td><td>IBM cria os bancos <strong>hierárquico</strong> e <strong>em rede</strong>. Para consultar, era preciso saber como os dados estavam gravados no disco.</td></tr>
+    <tr><td>1970</td><td><strong>Edgar F. Codd</strong> (IBM) propõe o <em class="termo">modelo relacional</em>: dados em tabelas que se relacionam.</td></tr>
+    <tr><td>1974</td><td><strong>Donald Chamberlin e Raymond Boyce</strong> (IBM) criam a linguagem SEQUEL, depois rebatizada <strong>SQL</strong>.</td></tr>
+    <tr><td>Anos 1980</td><td>Bancos relacionais comerciais dominam o mercado.</td></tr>
+    <tr><td>Anos 2000+</td><td>Internet e grandes volumes: surgem os bancos <strong>NoSQL</strong> (veremos na aula 7).</td></tr>
+  </table>
+  <p>Mais de 50 anos depois, a ideia de Codd ainda é a base de quase todo sistema comercial. É nela que vamos focar.</p>
+  <p class="fonte">Livro, cap. 5, p. 19–20 · <a href="https://www.historyofinformation.com/detail.php?id=910">History of Information: Chamberlin &amp; Boyce</a></p>
+  
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 2 · 30 min</span>
+  <h2>SGBD: quem toma conta do banco</h2>
+  <p>O banco são os dados. O SGBD é o programa que fica na porta.</p>
+</section>
+
+<section class="slide">
+  <h2>Banco de dados ≠ SGBD</h2>
+  <div class="duas">
+    <div>
+      <p><em class="termo">Banco de dados</em>: a coleção de dados (as tabelas da AutoNex).</p>
+      <p><em class="termo">SGBD</em> — Sistema de Gerenciamento de Banco de Dados: o <strong>software</strong> que controla todo acesso a esses dados.</p>
+      <p>Ninguém mexe no arquivo direto. Toda leitura e toda escrita <strong>passa pelo SGBD</strong>.</p>
+    </div>
+    <div>
+      <div class="caixa centro">Sistema de vendas &nbsp;·&nbsp; Site &nbsp;·&nbsp; phpMyAdmin</div>
+      <p class="centro">▼ pedem em SQL ▼</p>
+      <div class="caixa ideia centro"><strong>SGBD</strong> (MariaDB)<br><span class="fonte">confere regras · controla acesso · organiza acessos simultâneos</span></div>
+      <p class="centro">▼</p>
+      <div class="caixa centro">Banco de dados <code>AutoNex</code></div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 6, p. 22–23.</p>
+</section>
+
+<section class="slide">
+  <h2>O que o SGBD faz por nós</h2>
+  <ul>
+    <li><strong>Impõe regras</strong> — quantidade é número, CNPJ não se repete. A aplicação não precisa conferir tudo sozinha.</li>
+    <li><strong>Guarda a estrutura junto com os dados</strong> — os <em class="termo">metadados</em> (nomes das tabelas, tipos das colunas).</li>
+    <li><strong>Controla quem acessa</strong> — usuário, senha e níveis de privilégio.</li>
+    <li><strong>Permite acesso simultâneo</strong> — vários usuários e várias aplicações no mesmo banco.</li>
+    <li><strong>Faz backup</strong> — copia o estado do banco para recuperar depois de um desastre.</li>
+  </ul>
+  <div class="caixa">
+    <span class="rotulo">SGBDs que você vai encontrar no mercado</span>
+    MySQL · <strong>MariaDB</strong> (o nosso) · PostgreSQL · Oracle · SQL Server · SQLite
+  </div>
+  <p class="fonte">Livro, cap. 6, p. 23.</p>
+</section>
+
+<section class="slide">
+  <h2>Dado é coisa séria: segurança e ética</h2>
+  <div class="tres">
+    <div class="caixa"><span class="rotulo">Confidencialidade</span>Só quem tem autorização vê. <br><span class="fonte">Quebra: entrar com a senha de outra pessoa.</span></div>
+    <div class="caixa"><span class="rotulo">Integridade</span>O dado está correto e completo. <br><span class="fonte">Quebra: alguém altera um valor indevidamente.</span></div>
+    <div class="caixa"><span class="rotulo">Disponibilidade</span>O dado está acessível quando preciso. <br><span class="fonte">Quebra: sistema fora do ar.</span></div>
+  </div>
+  <p>Quem trabalha com banco de dados lida com informação sensível de outras pessoas. No Brasil, a <strong>LGPD</strong> (Lei 13.709/2018) define regras para tratar dados pessoais.</p>
+  <p>Regra prática do curso: <strong>não use dados reais de pessoas nos exercícios</strong> e nunca compartilhe sua senha do banco.</p>
+  <p class="fonte">Livro, cap. 2 e 4, p. 11–17 · <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm">LGPD</a></p>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Qual princípio foi quebrado?</h2>
+  <p><span class="timer" data-min="4"></span> &nbsp;Em dupla, classifique cada caso: confidencialidade, integridade ou disponibilidade.</p>
+  <ol>
+    <li>Um estagiário exportou a lista de clientes com CNPJ e telefone e mandou para um amigo.</li>
+    <li>O servidor do banco caiu na Black Friday e a loja ficou 3 horas sem vender.</li>
+    <li>Um erro no sistema gravou o preço de todos os produtos como R$ 0,00.</li>
+    <li>Um vendedor consegue ver o salário de todos os colegas na tela de relatórios.</li>
+  </ol>
+  <div class="resposta">
+    <p>1 — confidencialidade · 2 — disponibilidade · 3 — integridade · 4 — confidencialidade.</p>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 3 · 40 min</span>
+  <h2>O modelo relacional</h2>
+  <p>Tudo é tabela. Mas tabela com regras.</p>
+</section>
+
+<section class="slide">
+  <h2>Anatomia de uma tabela</h2>
+  <table>
+    <caption>Produtos</caption>
+    <tr><th class="pk">ProdutoID</th><th>Nome</th><th class="num">Preco</th><th class="num">Estoque</th></tr>
+    <tr><td class="pk">1</td><td>Correia de distribuição</td><td class="num">512.05</td><td class="num">200</td></tr>
+    <tr><td class="pk">2</td><td>Pneu X 205/55 R16</td><td class="num">350.00</td><td class="num">100</td></tr>
+    <tr><td class="pk">3</td><td>Filtro de óleo</td><td class="num">38.90</td><td class="num">500</td></tr>
+  </table>
+  <table>
+    <tr><th>No dia a dia</th><th>Nome formal</th><th>O que é</th></tr>
+    <tr><td>Tabela</td><td><em class="termo">Relação</em></td><td>O conjunto todo: <code>Produtos</code></td></tr>
+    <tr><td>Coluna</td><td><em class="termo">Atributo</em></td><td>Uma característica: <code>Preco</code></td></tr>
+    <tr><td>Linha, registro</td><td><em class="termo">Tupla</em></td><td>Um produto específico: a linha do Pneu X</td></tr>
+    <tr><td>Tipo da coluna</td><td><em class="termo">Domínio</em></td><td>Os valores permitidos: <code>Estoque</code> só aceita inteiros</td></tr>
+  </table>
+  <p class="fonte">Livro, cap. 7, p. 24–25 (Elmasri &amp; Navathe, 2011).</p>
+</section>
+
+<section class="slide">
+  <h2>Três regras que diferenciam tabela de planilha</h2>
+  <ol>
+    <li><strong>Cada coluna tem um domínio.</strong> Se <code>Estoque</code> é inteiro, "dois" é recusado.</li>
+    <li><strong>Cada célula guarda um valor só</strong> — um valor <em class="termo">atômico</em>. Nada de dois telefones na mesma célula.</li>
+    <li><strong>Não existem duas linhas idênticas.</strong> Alguma coluna (ou combinação) precisa identificar cada linha. Aqui é o <code>ProdutoID</code>.</li>
+  </ol>
+  <div class="caixa ideia">
+    <span class="rotulo">Notação de esquema</span>
+    <code>Produtos(<u>ProdutoID</u>, Nome, Descricao, Preco, Estoque)</code><br>
+    Nome da relação, lista de atributos, identificador sublinhado. O <em class="termo">grau</em> da relação é o número de atributos: aqui, 5.
+  </div>
+  <p class="fonte">Livro, cap. 7, p. 25.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Leia a tabela como um DBA</h2>
+  <p><span class="timer" data-min="5"></span></p>
+  <table>
+    <caption>Funcionarios</caption>
+    <tr><th>FuncionarioID</th><th>Nome</th><th>Cargo</th><th class="num">Salario</th><th>DataContratacao</th></tr>
+    <tr><td>1</td><td>Agata Silva</td><td>Vendedora</td><td class="num">3200.00</td><td>2020-01-15</td></tr>
+    <tr><td>2</td><td>Joaquim Silveira</td><td>Vendedor</td><td class="num">2900.00</td><td>2021-06-01</td></tr>
+    <tr><td>3</td><td>Ruan Carlos Costa</td><td>Gerente de Vendas</td><td class="num">6500.00</td><td>2018-03-12</td></tr>
+  </table>
+  <ol>
+    <li>Qual é o nome da relação? Qual o grau dela?</li>
+    <li>Quantas tuplas existem?</li>
+    <li>Qual seria o domínio de <code>Salario</code>? E de <code>DataContratacao</code>?</li>
+    <li>Escreva o esquema na notação <code>Nome(atributos)</code>.</li>
+  </ol>
+  <div class="resposta">
+    <p>1 — <code>Funcionarios</code>, grau 5 · 2 — três tuplas · 3 — número decimal com 2 casas; data · 4 — <code>Funcionarios(<u>FuncionarioID</u>, Nome, Cargo, Salario, DataContratacao)</code></p>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Intervalo · 20 min</span>
+  <h2>Na volta: mão no teclado</h2>
+  <p>Deixe o computador ligado e logado.</p>
+</section>
+
+<section class="slide">
+  <h2>Nosso laboratório: XAMPP</h2>
+  <div class="duas">
+    <div>
+      <p>O XAMPP instala de uma vez:</p>
+      <ul>
+        <li><strong>Apache</strong> — servidor web</li>
+        <li><strong>MariaDB</strong> — o SGBD</li>
+        <li><strong>PHP</strong></li>
+        <li><strong>phpMyAdmin</strong> — tela web para conversar com o SGBD</li>
+      </ul>
+      <div class="caixa aviso">No painel o botão diz <strong>MySQL</strong>, mas o que roda é o <strong>MariaDB</strong>: um SGBD derivado do MySQL e compatível com ele. Os comandos do livro funcionam, com pequenas diferenças que vou avisando.</div>
+    </div>
+    <div>
+      <div class="caixa">
+        <span class="rotulo">Passo a passo</span>
+        <ol>
+          <li>Abra o <strong>XAMPP Control Panel</strong>.</li>
+          <li>Clique em <strong>Start</strong> no Apache.</li>
+          <li>Clique em <strong>Start</strong> no MySQL.</li>
+          <li>Os dois nomes ficam com fundo verde.</li>
+          <li>No navegador: <code>http://localhost/phpmyadmin</code></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <p class="fonte"><a href="https://www.apachefriends.org/download.html">apachefriends.org</a>: as versões para Windows trazem MariaDB 10.4.32 e phpMyAdmin 5.2.1.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Um passeio pelo phpMyAdmin</h2>
+  <table>
+    <tr><th>Onde</th><th>Para que serve</th></tr>
+    <tr><td>Painel da esquerda</td><td>Lista de bancos de dados; clique para abrir e ver as tabelas.</td></tr>
+    <tr><td>Aba <strong>SQL</strong></td><td>Caixa para digitar comandos. É onde vamos viver neste curso.</td></tr>
+    <tr><td>Aba <strong>Estrutura</strong></td><td>Colunas e tipos de uma tabela (os metadados).</td></tr>
+    <tr><td>Aba <strong>Procurar</strong></td><td>Mostra as linhas de uma tabela.</td></tr>
+    <tr><td>Aba <strong>Exportar</strong></td><td>Gera um arquivo <code>.sql</code> com o banco inteiro: o seu backup.</td></tr>
+  </table>
+  <div class="caixa ideia">
+    <span class="rotulo">Combinado do curso</span>
+    O phpMyAdmin deixa criar tabela clicando em botões. <strong>Nós vamos digitar o SQL.</strong> Os botões só existem no phpMyAdmin; o SQL funciona em qualquer SGBD e em qualquer empresa.
+  </div>
+  <p class="fonte"><a href="https://docs.phpmyadmin.net/pt-br/latest/">Documentação do phpMyAdmin</a></p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 4 · 45 min</span>
+  <h2>Seu primeiro SQL</h2>
+  <p>Quatro comandos. No fim, um banco com dados dentro.</p>
+</section>
+
+<section class="slide">
+  <h2>Passo 1 — criar o banco</h2>
+  <p>No phpMyAdmin, clique na aba <strong>SQL</strong> (sem nenhum banco selecionado), digite e clique em <strong>Executar</strong>:</p>
+<pre><code class="sql">CREATE DATABASE AutoNex;</code></pre>
+  <p>O banco aparece no painel da esquerda. <strong>Clique nele</strong> para que os próximos comandos rodem dentro dele.</p>
+  <div class="caixa">
+    <span class="rotulo">Como o SQL é escrito</span>
+    <ul>
+      <li>Todo comando termina com <strong>ponto e vírgula</strong>.</li>
+      <li>Palavras do SQL em MAIÚSCULAS é convenção, não obrigação. Ajuda a ler.</li>
+      <li>Textos vão entre <strong>aspas simples</strong>: <code>'Pneu X'</code>.</li>
+    </ul>
+  </div>
+  <p class="fonte">Livro, cap. 11.1, p. 51.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Passo 2 — criar a tabela</h2>
+  <div class="duas larga-estreita">
+    <div>
+<pre><code class="sql">CREATE TABLE Produtos (
+    ProdutoID INT PRIMARY KEY,
+    Nome      VARCHAR(100),
+    Descricao TEXT,
+    Preco     DECIMAL(10,2),
+    Estoque   INT
+);</code></pre>
+      <p>Cada linha dentro dos parênteses é <strong>uma coluna</strong>: nome, depois o tipo (o domínio).</p>
+    </div>
+    <div>
+      <table>
+        <tr><th>Tipo</th><th>Guarda</th></tr>
+        <tr><td><code>INT</code></td><td>número inteiro</td></tr>
+        <tr><td><code>VARCHAR(100)</code></td><td>texto de até 100 caracteres</td></tr>
+        <tr><td><code>TEXT</code></td><td>texto longo</td></tr>
+        <tr><td><code>DECIMAL(10,2)</code></td><td>número com 2 casas decimais</td></tr>
+      </table>
+      <p><code>PRIMARY KEY</code>: esta coluna identifica cada linha e não pode repetir. Aula 3 inteira sobre isso.</p>
+    </div>
+  </div>
+  <p>Depois de executar, abra a aba <strong>Estrutura</strong> da tabela e confira as colunas.</p>
+  <p class="fonte">Livro, cap. 11.1, p. 51 · <a href="https://mariadb.com/kb/en/create-table/">MariaDB: CREATE TABLE</a></p>
+</section>
+
+<section class="slide">
+  <h2>Passo 3 — inserir dados</h2>
+<pre><code class="sql">INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (1, 'Correia de distribuição',
+        'Correia dentada que sincroniza o motor', 512.05, 200);
+
+INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (2, 'Pneu X 205/55 R16', 'Pneu de alta performance', 350.00, 100);</code></pre>
+  <div class="duas">
+    <div class="caixa aviso">
+      <span class="rotulo">Atenção</span>
+      Decimal em SQL usa <strong>ponto</strong>: <code>512.05</code>.<br>A vírgula separa um valor do outro.
+    </div>
+    <div class="caixa">
+      <span class="rotulo">Leia assim</span>
+      "Insira em Produtos, nestas colunas, estes valores." A ordem dos valores segue a ordem das colunas.
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.2, p. 55 · <a href="https://mariadb.com/kb/en/insert/">MariaDB: INSERT</a></p>
+</section>
+
+<section class="slide">
+  <h2>Passo 4 — consultar</h2>
+<pre><code class="sql">SELECT * FROM Produtos;</code></pre>
+  <table>
+    <tr><th>ProdutoID</th><th>Nome</th><th>Descricao</th><th class="num">Preco</th><th class="num">Estoque</th></tr>
+    <tr><td>1</td><td>Correia de distribuição</td><td>Correia dentada que sincroniza o motor</td><td class="num">512.05</td><td class="num">200</td></tr>
+    <tr><td>2</td><td>Pneu X 205/55 R16</td><td>Pneu de alta performance</td><td class="num">350.00</td><td class="num">100</td></tr>
+  </table>
+  <p>O <code>*</code> quer dizer "todas as colunas". Para escolher colunas:</p>
+<pre><code class="sql">SELECT Nome, Preco FROM Produtos;</code></pre>
+  <p class="grande">Você acabou de fazer as duas pontas: guardar e recuperar.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Quebre as regras de propósito</h2>
+  <p><span class="timer" data-min="10"></span> &nbsp;Execute cada comando e <strong>leia a mensagem</strong>. Anote: funcionou? Por quê?</p>
+<pre><code class="sql">-- A
+INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (2, 'Filtro de óleo', 'Filtro para motores 1.0 a 2.0', 38.90, 500);
+
+-- B
+INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (3, 'Filtro de óleo', 'Filtro para motores 1.0 a 2.0', 38.90, 'quinhentos');
+
+-- C
+INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (3, 'Filtro de óleo', 'Filtro para motores 1.0 a 2.0', 38.90, 500);</code></pre>
+  <div class="resposta">
+    <p><strong>A</strong> falha: já existe o <code>ProdutoID</code> 2 (entrada duplicada para a chave primária).<br>
+    <strong>B</strong> falha: <code>'quinhentos'</code> não é um inteiro (valor incorreto para a coluna <code>Estoque</code>).<br>
+    <strong>C</strong> funciona. Era isso que a planilha não fazia: o SGBD recusou os dados errados.</p>
+  </div>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Complete o catálogo</h2>
+  <p><span class="timer" data-min="12"></span> &nbsp;Insira mais três produtos e depois responda com um <code>SELECT</code>.</p>
+  <table>
+    <tr><th>ProdutoID</th><th>Nome</th><th>Descricao</th><th class="num">Preco</th><th class="num">Estoque</th></tr>
+    <tr><td>4</td><td>Pastilha de freio dianteira</td><td>Jogo com 4 pastilhas</td><td class="num">189.90</td><td class="num">150</td></tr>
+    <tr><td>5</td><td>Bateria 60Ah</td><td>Bateria selada, 18 meses de garantia</td><td class="num">620.00</td><td class="num">40</td></tr>
+    <tr><td>6</td><td>Amortecedor traseiro</td><td>Amortecedor a gás</td><td class="num">430.00</td><td class="num">12</td></tr>
+  </table>
+  <ol>
+    <li>Mostre só o nome e o estoque de todos os produtos.</li>
+    <li>Quantas tuplas a relação <code>Produtos</code> tem agora?</li>
+  </ol>
+  <div class="resposta">
+<pre><code class="sql">INSERT INTO Produtos (ProdutoID, Nome, Descricao, Preco, Estoque)
+VALUES (4, 'Pastilha de freio dianteira', 'Jogo com 4 pastilhas', 189.90, 150);
+-- (idem para 5 e 6)
+
+SELECT Nome, Estoque FROM Produtos;</code></pre>
+    <p>Seis tuplas (1, 2, 3 do exercício anterior, 4, 5 e 6).</p>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Revisão relâmpago</h2>
+  <div class="quiz">
+    <p class="pergunta">1. Qual é o papel do SGBD?</p>
+    <ol>
+      <li>Guardar os dados em uma planilha compartilhada</li>
+      <li data-certa>Controlar todo acesso aos dados do banco</li>
+      <li>Desenhar as telas do sistema para usuário</li>
+    </ol>
+    <div class="explica">Toda leitura e escrita passa pelo SGBD; é ele que aplica as regras.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. No modelo relacional, uma linha da tabela se chama…</p>
+    <ol>
+      <li>atributo</li>
+      <li>domínio</li>
+      <li data-certa>tupla</li>
+    </ol>
+    <div class="explica">Tabela = relação, coluna = atributo, linha = tupla, tipo = domínio.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. Por que o INSERT com estoque 'quinhentos' foi recusado?</p>
+    <ol>
+      <li>Porque a chave primária já existia</li>
+      <li>Porque faltou o ponto e vírgula</li>
+      <li data-certa>Porque o valor foge do domínio</li>
+    </ol>
+    <div class="explica">A coluna foi declarada como INT; o SGBD só aceita valores desse domínio.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Para casa e para a próxima aula</h2>
+  <div class="duas">
+    <div>
+      <div class="caixa certo">
+        <span class="rotulo">Hoje você conseguiu</span>
+        Criar um banco, uma tabela com domínios, inserir dados e consultá-los. E viu o SGBD recusar dado errado.
+      </div>
+      <p><strong>Lista 1:</strong> <a href="../listas/lista-01.html">listas/lista-01.html</a></p>
+      <p><strong>Leitura:</strong> livro, capítulos 1 a 7 (p. 9–25).</p>
+      <p><strong>Consulta rápida:</strong> <a href="../reference/glossario.html">glossário</a> · <a href="../reference/cola-sql.html">cola de SQL</a></p>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Próxima aula</span>
+        Hoje a tabela veio pronta. Na aula 2 você aprende a <strong>descobrir quais tabelas um sistema precisa</strong>, desenhando o modelo entidade-relacionamento.
+        <br><a href="0002-modelagem-er.html">Aula 2 →</a>
+      </div>
+      <p class="fonte">Ficou com dúvida? Pergunte ao professor na aula.</p>
+    </div>
+  </div>
+  
+</section>
+
+</body>
+</html>

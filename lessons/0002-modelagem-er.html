@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 2 — Modelagem entidade-relacionamento</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="deck">
+
+<section class="slide capa">
+  <span class="rotulo">UC4 · Banco de Dados · Aula 2 de 7</span>
+  <h1>Modelagem entidade-relacionamento</h1>
+  <p class="sub">Antes de criar tabelas, descobrir quais tabelas o problema pede</p>
+  <p class="meta">Hoje você sai com: o DER completo da AutoNex e o DER de um caso novo, feito por você.<br>
+  Livro: capítulos 8 e 9, mais 10.3.4 e 10.3.5 · Material: papel e caneta (ou brModelo / draw.io)</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Antes de começar: o que ficou da aula 1?</h2>
+  <div class="quiz">
+    <p class="pergunta">1. Os valores que uma coluna aceita formam o seu…</p>
+    <ol>
+      <li>atributo</li>
+      <li data-certa>domínio</li>
+      <li>esquema</li>
+    </ol>
+    <div class="explica">Domínio = conjunto de valores permitidos (tipo e formato).</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. Qual problema da planilha a chave primária resolveu no exercício?</p>
+    <ol>
+      <li>Texto digitado em coluna numérica</li>
+      <li data-certa>Duas linhas com mesmo identificador</li>
+      <li>Dois usuários gravando ao mesmo tempo</li>
+    </ol>
+    <div class="explica">O segundo INSERT com ProdutoID 2 foi recusado: entrada duplicada.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. Escreva no caderno, sem olhar: o comando para ver nome e preço de todos os produtos.</p>
+    <ol>
+      <li data-certa>Conferir a resposta</li>
+    </ol>
+    <div class="explica"><code>SELECT Nome, Preco FROM Produtos;</code></div>
+  </div>
+  
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 1 · 40 min</span>
+  <h2>Do mundo real para o papel</h2>
+  <p>Na aula 1 a tabela veio pronta. Na vida real, ninguém entrega a tabela pronta: entregam um problema.</p>
+</section>
+
+<section class="slide">
+  <h2>O dono da AutoNex descreve o negócio</h2>
+  <div class="caixa">
+    <p class="grande">"A gente vende autopeças para oficinas e lojas. Cada <u>cliente</u> tem nome, CNPJ, endereço, telefone e e-mail. Os <u>produtos</u> têm nome, descrição, preço e a quantidade em estoque. Quem atende são os nossos <u>funcionários</u>; preciso saber cargo, salário e data de contratação de cada um. Cada <u>venda</u> é feita para um cliente, por um funcionário, numa data, e pode ter vários produtos, cada um com sua quantidade."</p>
+  </div>
+  <p>Esse texto é o <em class="termo">minimundo</em>: a parte do mundo real que o sistema precisa representar.</p>
+  <p><strong>Modelar</strong> é transformar esse texto num desenho que o cliente entende e o desenvolvedor consegue implementar.</p>
+  <p class="fonte">Livro, cap. 8, p. 28.</p>
+</section>
+
+<section class="slide">
+  <h2>Três níveis de modelo</h2>
+  <table>
+    <tr><th>Nível</th><th>Pergunta que responde</th><th>Produto</th><th>Quando</th></tr>
+    <tr><td><em class="termo">Conceitual</em></td><td>O que o negócio precisa guardar?</td><td>DER (diagrama entidade-relacionamento)</td><td><strong>Hoje</strong></td></tr>
+    <tr><td><em class="termo">Lógico</em></td><td>Quais tabelas, colunas e chaves?</td><td>Esquema relacional</td><td>Aula 3</td></tr>
+    <tr><td><em class="termo">Físico</em></td><td>Como criar isso neste SGBD?</td><td>Script SQL (<code>CREATE TABLE</code>)</td><td>Aula 4</td></tr>
+  </table>
+  <div class="caixa ideia">
+    Errar no desenho custa uma borracha. Errar depois que o sistema está no ar, com dados dentro, custa caro. Por isso <strong>modelamos antes de criar</strong>.
+  </div>
+  <p class="fonte">Livro, cap. 8.1, p. 26–28.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Entidade e atributo</h2>
+  <div class="duas">
+    <div>
+      <p><em class="termo">Entidade</em>: algo do minimundo sobre o qual queremos guardar dados. Pode ser:</p>
+      <ul>
+        <li>um objeto concreto — <strong>Produto</strong></li>
+        <li>uma pessoa ou empresa — <strong>Cliente</strong>, <strong>Funcionário</strong></li>
+        <li>um evento — <strong>Venda</strong></li>
+      </ul>
+      <p><em class="termo">Atributo</em>: uma característica da entidade. Cliente tem Nome, CNPJ, Telefone…</p>
+    </div>
+    <div>
+      <div class="caixa">
+        <span class="rotulo">Como achar no texto</span>
+        <p><strong>Substantivos</strong> que se repetem e têm características próprias → candidatos a entidade.</p>
+        <p>As <strong>características</strong> citadas → atributos.</p>
+      </div>
+      <div class="caixa aviso">
+        <span class="rotulo">Teste rápido</span>
+        Se a "coisa" não tem nenhuma característica para guardar, provavelmente é atributo de outra entidade, não uma entidade.
+      </div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 8, p. 28.</p>
+</section>
+
+<section class="slide">
+  <h2>A notação do DER</h2>
+  <div class="duas">
+    <div>
+      <table>
+        <tr><th>Símbolo</th><th>Representa</th></tr>
+        <tr><td><span class="entidade" style="display:inline-block">CLIENTES</span></td><td><strong>Retângulo</strong> — entidade</td></tr>
+        <tr><td><span style="display:inline-block;border:.12em solid var(--tinta);border-radius:50%;padding:.2em 1em;background:#fff">Nome</span></td><td><strong>Elipse</strong> — atributo</td></tr>
+        <tr><td><span style="display:inline-block;border:.12em solid var(--tinta);border-radius:50%;padding:.2em 1em;background:#fff"><u>ClienteID</u></span></td><td>Elipse sublinhada — <strong>identificador</strong></td></tr>
+        <tr><td style="padding:1.2em 1.6em"><span class="relacao" style="display:inline-grid;width:3.4em;height:3.4em"><span>faz</span></span></td><td><strong>Losango</strong> — relacionamento</td></tr>
+      </table>
+    </div>
+    <div>
+      <p><em class="termo">Identificador</em>: o atributo (ou conjunto mínimo de atributos) que distingue cada ocorrência da entidade.</p>
+      <ul>
+        <li>Nome do cliente serve? Só se nunca houver dois iguais.</li>
+        <li>CNPJ serve: é único por empresa.</li>
+        <li>Na prática criamos um código: <code>ClienteID</code>.</li>
+      </ul>
+      <p class="fonte">Livro, cap. 8 e 9, p. 30 e 32. Existem outras notações; a ideia é a mesma em todas.</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide exercicio">
+  <h2>Ache as entidades e os atributos</h2>
+  <p><span class="timer" data-min="8"></span> &nbsp;Sozinho, no caderno. Liste entidades, atributos e sublinhe um identificador para cada.</p>
+  <div class="caixa">
+    "A academia FitLab cadastra seus <strong>alunos</strong> com nome, CPF, data de nascimento e telefone. Os <strong>instrutores</strong> têm nome, CREF e especialidade. A academia oferece <strong>modalidades</strong> (musculação, pilates, natação), cada uma com nome e valor da mensalidade."
+  </div>
+  <div class="resposta">
+    <ul>
+      <li><strong>Alunos</strong>(<u>CPF</u> ou <u>AlunoID</u>, Nome, DataNascimento, Telefone)</li>
+      <li><strong>Instrutores</strong>(<u>CREF</u> ou <u>InstrutorID</u>, Nome, Especialidade)</li>
+      <li><strong>Modalidades</strong>(<u>ModalidadeID</u>, Nome, ValorMensalidade)</li>
+    </ul>
+    <p>"Academia" não é entidade: só existe uma e não guardamos nada sobre ela. "Musculação, pilates, natação" são <em>ocorrências</em> de Modalidades, não entidades.</p>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 2 · 55 min</span>
+  <h2>Relacionamentos e cardinalidades</h2>
+  <p>Entidades soltas não contam a história. O que liga Cliente a Venda?</p>
+</section>
+
+<section class="slide">
+  <h2>Relacionamento</h2>
+  <p><em class="termo">Relacionamento</em>: uma associação entre entidades. No texto, costuma aparecer como <strong>verbo</strong>.</p>
+  <div class="der">
+    <span class="entidade">CLIENTES</span><span class="liga"></span>
+    <span class="relacao"><span>faz</span></span>
+    <span class="liga"></span><span class="entidade">VENDAS</span>
+  </div>
+  <p>"Cada venda é feita <strong>para</strong> um cliente" → Clientes <em>faz</em> Vendas.<br>
+  "…<strong>por</strong> um funcionário" → Funcionários <em>realiza</em> Vendas.</p>
+  <p>Falta dizer <strong>quantos</strong>: um cliente pode fazer quantas vendas? Uma venda pode ser de quantos clientes? Essa contagem é a <em class="termo">cardinalidade</em>.</p>
+  <p class="fonte">Livro, cap. 8, p. 28, e 10.3.5, p. 47.</p>
+</section>
+
+<section class="slide">
+  <h2>Cardinalidade: mínimo e máximo</h2>
+  <p>Para cada lado do relacionamento, fazemos <strong>duas perguntas</strong>:</p>
+  <div class="der">
+    <span class="entidade">CLIENTES</span><span class="liga"><b>(1,1)</b></span>
+    <span class="relacao"><span>faz</span></span>
+    <span class="liga"><b>(0,N)</b></span><span class="entidade">VENDAS</span>
+  </div>
+  <div class="duas">
+    <div class="caixa">
+      <span class="rotulo">Lendo da esquerda para a direita</span>
+      Um cliente faz <strong>no mínimo 0</strong> e <strong>no máximo N</strong> vendas.<br>
+      <span class="fonte">Pode estar cadastrado sem ter comprado; pode comprar muitas vezes.</span>
+    </div>
+    <div class="caixa">
+      <span class="rotulo">Lendo da direita para a esquerda</span>
+      Uma venda é de <strong>no mínimo 1</strong> e <strong>no máximo 1</strong> cliente.<br>
+      <span class="fonte">Não existe venda sem cliente nem venda com dois clientes.</span>
+    </div>
+  </div>
+  <div class="caixa ideia">A cardinalidade fica escrita <strong>perto da entidade que está sendo contada</strong>: (0,N) fica ao lado de VENDAS porque responde "quantas vendas?".</div>
+  <p class="fonte">Livro, 10.3.5, p. 47: "o número à esquerda é o mínimo, e o da direita é o máximo". O livro escreve [0..N]; (0,N) é a mesma coisa.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Os três tipos de relacionamento</h2>
+  <p>Olhando só para os <strong>máximos</strong> dos dois lados:</p>
+  <table>
+    <tr><th>Tipo</th><th>Leitura</th><th>Exemplo</th></tr>
+    <tr><td><strong>1:1</strong><br>um-para-um</td><td>Um A se liga a no máximo um B, e vice-versa.</td><td>Um funcionário usa um crachá; um crachá é de um funcionário.</td></tr>
+    <tr><td><strong>1:N</strong><br>um-para-muitos</td><td>Um A se liga a vários B; cada B se liga a um só A.</td><td>Um cliente faz várias vendas; cada venda é de um cliente.</td></tr>
+    <tr><td><strong>N:N</strong><br>muitos-para-muitos</td><td>Um A se liga a vários B, e um B a vários A.</td><td>Uma venda tem vários produtos; um produto aparece em várias vendas.</td></tr>
+  </table>
+  <p>O <strong>mínimo</strong> diz se a participação é <em class="termo">obrigatória</em> (1) ou <em class="termo">opcional</em> (0).</p>
+  <p class="fonte">Livro, 10.3.4, p. 45–46.</p>
+</section>
+
+<section class="slide">
+  <h2>Outra notação: pé de galinha</h2>
+  <div class="duas">
+    <div>
+      <p>Muitas ferramentas (inclusive o Designer do phpMyAdmin) não desenham losango. Ligam as entidades direto e usam símbolos na ponta da linha:</p>
+      <table>
+        <tr><th>Ponta da linha</th><th>Significa</th></tr>
+        <tr><td style="font-family:var(--mono)">──||</td><td>exatamente um (1,1)</td></tr>
+        <tr><td style="font-family:var(--mono)">──o|</td><td>zero ou um (0,1)</td></tr>
+        <tr><td style="font-family:var(--mono)">──o&lt;</td><td>zero ou muitos (0,N)</td></tr>
+        <tr><td style="font-family:var(--mono)">──|&lt;</td><td>um ou muitos (1,N)</td></tr>
+      </table>
+    </div>
+    <div>
+      <pre class="saida"><code>CLIENTES ||────────o&lt; VENDAS</code></pre>
+      <p>Mesma informação do slide anterior: um cliente, zero ou muitas vendas.</p>
+      <div class="caixa">O "pé de galinha" (<code>&lt;</code>) sempre fica do lado <strong>muitos</strong>.</div>
+      <p>Nas aulas usamos (mín,máx). Você precisa saber <strong>ler</strong> as duas.</p>
+    </div>
+  </div>
+  <p class="fonte">Livro, 10.3.5, p. 48.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Qual é a cardinalidade?</h2>
+  <p><span class="timer" data-min="10"></span> &nbsp;Em dupla. Para cada par, leia nos dois sentidos e diga o tipo (1:1, 1:N ou N:N).</p>
+  <ol>
+    <li><strong>Funcionário</strong> realiza <strong>Venda</strong> (na AutoNex).</li>
+    <li><strong>Aluno</strong> matricula-se em <strong>Modalidade</strong> (na FitLab; pode fazer pilates e natação).</li>
+    <li><strong>País</strong> tem <strong>Capital</strong>.</li>
+    <li><strong>Turma</strong> tem <strong>Aluno</strong> (numa escola em que cada aluno está em uma turma só).</li>
+    <li><strong>Médico</strong> atende <strong>Paciente</strong>.</li>
+  </ol>
+  <div class="resposta">
+    <p>1 — <strong>1:N</strong>: um funcionário realiza (0,N) vendas; uma venda é realizada por um funcionário.<br>
+    2 — <strong>N:N</strong>: um aluno em várias modalidades; uma modalidade com vários alunos.<br>
+    3 — <strong>1:1</strong>.<br>
+    4 — <strong>1:N</strong>: uma turma, vários alunos; um aluno, uma turma.<br>
+    5 — <strong>N:N</strong>: um médico atende vários pacientes; um paciente passa por vários médicos.</p>
+    <p>Repare: a resposta depende da <strong>regra do negócio</strong>. Se a FitLab só permitisse uma modalidade por aluno, o item 2 seria 1:N.</p>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Intervalo · 20 min</span>
+  <h2>Na volta: o problema do N:N</h2>
+  <p>Onde eu guardo a quantidade de cada produto numa venda?</p>
+</section>
+
+<section class="slide">
+  <h2>O relacionamento que tem atributos</h2>
+  <div class="der">
+    <span class="entidade">VENDAS</span><span class="liga"><b>(0,N)</b></span>
+    <span class="relacao"><span>contém</span></span>
+    <span class="liga"><b>(1,N)</b></span><span class="entidade">PRODUTOS</span>
+  </div>
+  <p>Na venda 2, a Auto Peças Curitiba levou <strong>10</strong> correias e <strong>40</strong> velas.</p>
+  <div class="duas">
+    <div class="caixa aviso">
+      <span class="rotulo">Onde guardar a quantidade?</span>
+      <p>Em <strong>Produtos</strong>? Não: a quantidade muda a cada venda.<br>
+      Em <strong>Vendas</strong>? Não: a venda tem vários produtos, cada um com a sua.</p>
+    </div>
+    <div class="caixa certo">
+      <span class="rotulo">Resposta</span>
+      <p>A quantidade pertence ao <strong>par</strong> (venda, produto). É um atributo do <strong>relacionamento</strong>.</p>
+    </div>
+  </div>
+  <p>Quando um N:N tem atributos próprios, ele vira uma entidade: a <em class="termo">entidade associativa</em>.</p>
+  <p class="fonte">Livro, cap. 8, p. 30: "o modelo ER oferece a possibilidade de os relacionamentos possuírem atributos".</p>
+</section>
+
+<section class="slide">
+  <h2>N:N vira duas relações 1:N</h2>
+  <div class="der">
+    <span class="entidade">VENDAS</span><span class="liga"><b>(1,N)</b></span>
+    <span class="entidade" style="border-style:double;border-width:.3em">ITENSVENDA</span>
+    <span class="liga"><b>(0,N)</b></span><span class="entidade">PRODUTOS</span>
+  </div>
+  <table>
+    <caption>ItensVenda — a venda 2 em detalhe</caption>
+    <tr><th>ItemVendaID</th><th class="fk">VendaID</th><th class="fk">ProdutoID</th><th class="num">Quantidade</th><th class="num">PrecoUnitario</th></tr>
+    <tr><td>3</td><td class="fk">2</td><td class="fk">1 (Correia)</td><td class="num">10</td><td class="num">512.05</td></tr>
+    <tr><td>4</td><td class="fk">2</td><td class="fk">7 (Vela)</td><td class="num">40</td><td class="num">24.50</td></tr>
+  </table>
+  <ul>
+    <li>Uma venda tem (1,N) itens; cada item pertence a uma venda.</li>
+    <li>Um produto aparece em (0,N) itens; cada item se refere a um produto.</li>
+  </ul>
+  <div class="caixa ideia">Por que guardar <code>PrecoUnitario</code> no item, se o produto já tem preço? Porque o preço do produto <strong>muda</strong>, e a venda precisa lembrar quanto custava <strong>naquele dia</strong>.</div>
+</section>
+
+<section class="slide">
+  <h2>O DER completo da AutoNex</h2>
+  <div class="der" style="gap:0">
+    <span class="entidade">CLIENTES</span><span class="liga"><b>(1,1)</b></span>
+    <span class="relacao"><span>faz</span></span><span class="liga"><b>(0,N)</b></span>
+    <span class="entidade">VENDAS</span><span class="liga"><b>(0,N)</b></span>
+    <span class="relacao"><span>realiza</span></span><span class="liga"><b>(0,1)</b></span>
+    <span class="entidade">FUNCIONÁRIOS</span>
+  </div>
+  <div class="der">
+    <span class="entidade">VENDAS</span><span class="liga"><b>(1,N)</b></span>
+    <span class="entidade" style="border-style:double;border-width:.3em">ITENSVENDA</span>
+    <span class="liga"><b>(0,N)</b></span><span class="entidade">PRODUTOS</span>
+  </div>
+  <table>
+    <tr><th>Entidade</th><th>Atributos (identificador sublinhado)</th></tr>
+    <tr><td>Clientes</td><td><u>ClienteID</u>, Nome, CNPJ, Endereco, Cidade, Estado, CEP, Telefone, Email</td></tr>
+    <tr><td>Funcionarios</td><td><u>FuncionarioID</u>, Nome, Cargo, Salario, DataContratacao, Telefone, Email</td></tr>
+    <tr><td>Produtos</td><td><u>ProdutoID</u>, Nome, Descricao, Preco, Estoque</td></tr>
+    <tr><td>Vendas</td><td><u>VendaID</u>, DataVenda, TotalVenda</td></tr>
+    <tr><td>ItensVenda</td><td><u>ItemVendaID</u>, Quantidade, PrecoUnitario</td></tr>
+  </table>
+  <p class="fonte">Livro, cap. 8, p. 29–31. Diferença para o livro: aqui uma venda pode não ter funcionário (0,1) — é uma venda feita pelo site.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Roteiro para modelar qualquer problema</h2>
+  <ol>
+    <li><strong>Leia o texto e sublinhe os substantivos.</strong> Quais têm características próprias? → entidades.</li>
+    <li><strong>Liste os atributos</strong> de cada entidade e escolha o identificador.</li>
+    <li><strong>Procure os verbos</strong> que ligam duas entidades → relacionamentos.</li>
+    <li><strong>Leia cada relacionamento nos dois sentidos</strong>, começando por "um(a)…", e anote (mín,máx).</li>
+    <li><strong>Achou N:N?</strong> Pergunte se o par tem dados próprios. Crie a entidade associativa.</li>
+    <li><strong>Confira com o texto:</strong> toda informação pedida tem lugar no desenho?</li>
+  </ol>
+  <div class="caixa">Não existe um único DER certo. Existe o DER que <strong>guarda tudo o que o negócio pediu</strong>, sem repetir informação.</div>
+</section>
+
+<section class="slide exercicio">
+  <h2>Oficina: Clínica PetVida</h2>
+  <p><span class="timer" data-min="40"></span> &nbsp;Em dupla, no papel. Siga os 6 passos e desenhe o DER completo.</p>
+  <div class="caixa">
+    "A clínica veterinária PetVida cadastra os <strong>tutores</strong> com nome, CPF e telefone. Cada tutor pode ter vários <strong>animais</strong>; de cada animal guardamos nome, espécie, raça e data de nascimento, e todo animal tem exatamente um tutor. A clínica tem vários <strong>veterinários</strong>, com nome, CRMV e especialidade. Um animal passa por <strong>consultas</strong>: cada consulta acontece numa data, é de um animal, é feita por um veterinário e registra o diagnóstico e o valor cobrado."
+  </div>
+  <p>Entregue: entidades com atributos e identificador, relacionamentos com (mín,máx) nos dois lados.</p>
+  <div class="resposta" data-rotulo="Mostrar uma solução">
+    <div class="der">
+      <span class="entidade">TUTORES</span><span class="liga"><b>(1,1)</b></span>
+      <span class="relacao"><span>possui</span></span><span class="liga"><b>(0,N)</b></span>
+      <span class="entidade">ANIMAIS</span><span class="liga"><b>(1,1)</b></span>
+      <span class="relacao"><span>passa por</span></span><span class="liga"><b>(0,N)</b></span>
+      <span class="entidade">CONSULTAS</span>
+    </div>
+    <div class="der">
+      <span class="entidade">VETERINÁRIOS</span><span class="liga"><b>(1,1)</b></span>
+      <span class="relacao"><span>realiza</span></span><span class="liga"><b>(0,N)</b></span>
+      <span class="entidade">CONSULTAS</span>
+    </div>
+    <p>Tutores(<u>TutorID</u>, Nome, CPF, Telefone) · Animais(<u>AnimalID</u>, Nome, Especie, Raca, DataNascimento) · Veterinarios(<u>VeterinarioID</u>, Nome, CRMV, Especialidade) · Consultas(<u>ConsultaID</u>, DataConsulta, Diagnostico, Valor)</p>
+    <p>Consultas é a entidade associativa do N:N entre Animais e Veterinários: um animal vê vários veterinários, um veterinário vê vários animais, e o par tem dados próprios (data, diagnóstico, valor).</p>
+  </div>
+  
+</section>
+
+<section class="slide">
+  <h2>Revisão relâmpago</h2>
+  <div class="quiz">
+    <p class="pergunta">1. Em um DER, o losango representa…</p>
+    <ol>
+      <li>uma entidade</li>
+      <li>um atributo</li>
+      <li data-certa>um relacionamento</li>
+    </ol>
+    <div class="explica">Retângulo = entidade, elipse = atributo, losango = relacionamento.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. "Um autor escreve vários livros; um livro pode ter vários autores." Isso é…</p>
+    <ol>
+      <li>1:1</li>
+      <li>1:N</li>
+      <li data-certa>N:N</li>
+    </ol>
+    <div class="explica">Muitos dos dois lados. Vai precisar de uma entidade associativa.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. Na cardinalidade (0,N), o zero significa que a participação é…</p>
+    <ol>
+      <li>proibida</li>
+      <li data-certa>opcional</li>
+      <li>obrigatória</li>
+    </ol>
+    <div class="explica">Mínimo 0 = pode não haver nenhum. Mínimo 1 = obrigatório.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Para casa e para a próxima aula</h2>
+  <div class="duas">
+    <div>
+      <div class="caixa certo">
+        <span class="rotulo">Hoje você conseguiu</span>
+        Ler um texto de requisitos e desenhar um DER com entidades, atributos, identificadores, relacionamentos e cardinalidades.
+      </div>
+      <p><strong>Lista 2:</strong> <a href="../listas/lista-02.html">listas/lista-02.html</a> — você começa a modelar a <strong>BiblioTech</strong>, a biblioteca que vai nos acompanhar nas listas até o fim.</p>
+      <p><strong>Leitura:</strong> livro, capítulos 8 e 9 (p. 26–32) e seções 10.3.4–10.3.5 (p. 45–48).</p>
+      <p><strong>Consulta rápida:</strong> <a href="../reference/glossario.html">glossário</a></p>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Próxima aula</span>
+        O DER ainda não é tabela. Na aula 3 transformamos o desenho em <strong>tabelas com chaves</strong> e aprendemos a detectar redundância com a <strong>normalização</strong>.
+        <br><a href="0003-chaves-e-normalizacao.html">Aula 3 →</a> · <a href="0001-do-arquivo-ao-banco.html">← Aula 1</a>
+      </div>
+      <p class="fonte">Guarde o DER da PetVida: ele volta na aula 3. Dúvidas sobre o material? Pergunte ao professor.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
