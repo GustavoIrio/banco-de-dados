@@ -80,6 +80,37 @@
 </section>
 
 <section class="slide">
+  <h2>O que é o DER</h2>
+  <div class="duas">
+    <div>
+      <p>O <em class="termo">DER</em> (diagrama entidade-relacionamento) é o <strong>desenho do modelo conceitual</strong>: mostra o que o sistema precisa guardar e como essas coisas se ligam.</p>
+      <p>É como a <strong>planta de uma casa</strong>: antes de levantar parede, todo mundo olha o mesmo desenho e combina onde fica cada cômodo.</p>
+      <ul>
+        <li>O <strong>cliente</strong> confere se o desenho representa o negócio dele.</li>
+        <li>O <strong>desenvolvedor</strong> usa o desenho para criar as tabelas.</li>
+        <li>Não depende de SGBD: o mesmo DER vale para MariaDB, PostgreSQL ou SQL Server.</li>
+      </ul>
+    </div>
+    <div>
+      <div class="caixa">
+        <span class="rotulo">Um DER é feito de três peças</span>
+        <p><strong>Entidades</strong> — as "coisas" do negócio: Clientes, Vendas.</p>
+        <p><strong>Atributos</strong> — o que guardamos de cada uma: Nome, CNPJ.</p>
+        <p><strong>Relacionamentos</strong> — como elas se ligam: Clientes <em>faz</em> Vendas.</p>
+      </div>
+      <div class="der">
+        <span class="entidade">CLIENTES</span><span class="liga"></span>
+        <span class="relacao"><span>faz</span></span>
+        <span class="liga"></span><span class="entidade">VENDAS</span>
+      </div>
+      <p>Nos próximos slides vemos cada peça e como desenhá-la.</p>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 8, p. 28–30. O modelo ER foi proposto por Peter Chen em 1976.</p>
+  
+</section>
+
+<section class="slide">
   <h2>Entidade e atributo</h2>
   <div class="duas">
     <div>
@@ -155,45 +186,45 @@
   </div>
   <p>"Cada venda é feita <strong>para</strong> um cliente" → Clientes <em>faz</em> Vendas.<br>
   "…<strong>por</strong> um funcionário" → Funcionários <em>realiza</em> Vendas.</p>
-  <p>Falta dizer <strong>quantos</strong>: um cliente pode fazer quantas vendas? Uma venda pode ser de quantos clientes? Essa contagem é a <em class="termo">cardinalidade</em>.</p>
+  <p>Falta dizer <strong>quantos</strong>: um cliente pode fazer quantas vendas? Uma venda pode ser de quantos clientes? A resposta, <strong>um</strong> ou <strong>muitos</strong>, é a <em class="termo">cardinalidade</em>.</p>
   <p class="fonte">Livro, cap. 8, p. 28, e 10.3.5, p. 47.</p>
 </section>
 
 <section class="slide">
-  <h2>Cardinalidade: mínimo e máximo</h2>
-  <p>Para cada lado do relacionamento, fazemos <strong>duas perguntas</strong>:</p>
+  <h2>Cardinalidade: um ou muitos?</h2>
+  <p>Para cada lado do relacionamento, fazemos <strong>uma pergunta</strong>, sempre começando por "um" ou "uma":</p>
   <div class="der">
-    <span class="entidade">CLIENTES</span><span class="liga"><b>(1,1)</b></span>
+    <span class="entidade">CLIENTES</span><span class="liga"><b>1</b></span>
     <span class="relacao"><span>faz</span></span>
-    <span class="liga"><b>(0,N)</b></span><span class="entidade">VENDAS</span>
+    <span class="liga"><b>N</b></span><span class="entidade">VENDAS</span>
   </div>
   <div class="duas">
     <div class="caixa">
       <span class="rotulo">Lendo da esquerda para a direita</span>
-      Um cliente faz <strong>no mínimo 0</strong> e <strong>no máximo N</strong> vendas.<br>
-      <span class="fonte">Pode estar cadastrado sem ter comprado; pode comprar muitas vezes.</span>
+      Um cliente faz quantas vendas? <strong>Várias</strong> → <strong>N</strong>.<br>
+      <span class="fonte">Um cliente pode comprar muitas vezes.</span>
     </div>
     <div class="caixa">
       <span class="rotulo">Lendo da direita para a esquerda</span>
-      Uma venda é de <strong>no mínimo 1</strong> e <strong>no máximo 1</strong> cliente.<br>
-      <span class="fonte">Não existe venda sem cliente nem venda com dois clientes.</span>
+      Uma venda é de quantos clientes? <strong>Um só</strong> → <strong>1</strong>.<br>
+      <span class="fonte">Não existe venda com dois clientes.</span>
     </div>
   </div>
-  <div class="caixa ideia">A cardinalidade fica escrita <strong>perto da entidade que está sendo contada</strong>: (0,N) fica ao lado de VENDAS porque responde "quantas vendas?".</div>
-  <p class="fonte">Livro, 10.3.5, p. 47: "o número à esquerda é o mínimo, e o da direita é o máximo". O livro escreve [0..N]; (0,N) é a mesma coisa.</p>
+  <div class="caixa ideia">A cardinalidade fica escrita <strong>perto da entidade que está sendo contada</strong>: o N fica ao lado de VENDAS porque responde "quantas vendas?".</div>
+  <p class="fonte">Livro, 10.3.5, p. 47.</p>
   
 </section>
 
 <section class="slide">
   <h2>Os três tipos de relacionamento</h2>
-  <p>Olhando só para os <strong>máximos</strong> dos dois lados:</p>
+  <p>Juntando as respostas dos <strong>dois lados</strong>:</p>
   <table>
     <tr><th>Tipo</th><th>Leitura</th><th>Exemplo</th></tr>
-    <tr><td><strong>1:1</strong><br>um-para-um</td><td>Um A se liga a no máximo um B, e vice-versa.</td><td>Um funcionário usa um crachá; um crachá é de um funcionário.</td></tr>
+    <tr><td><strong>1:1</strong><br>um-para-um</td><td>Um A se liga a um só B, e vice-versa.</td><td>Um funcionário usa um crachá; um crachá é de um funcionário.</td></tr>
     <tr><td><strong>1:N</strong><br>um-para-muitos</td><td>Um A se liga a vários B; cada B se liga a um só A.</td><td>Um cliente faz várias vendas; cada venda é de um cliente.</td></tr>
     <tr><td><strong>N:N</strong><br>muitos-para-muitos</td><td>Um A se liga a vários B, e um B a vários A.</td><td>Uma venda tem vários produtos; um produto aparece em várias vendas.</td></tr>
   </table>
-  <p>O <strong>mínimo</strong> diz se a participação é <em class="termo">obrigatória</em> (1) ou <em class="termo">opcional</em> (0).</p>
+  <div class="caixa ideia">Para descobrir o tipo, leia o relacionamento nos dois sentidos. Deu "muitos" dos dois lados? É N:N.</div>
   <p class="fonte">Livro, 10.3.4, p. 45–46.</p>
 </section>
 
@@ -204,17 +235,16 @@
       <p>Muitas ferramentas (inclusive o Designer do phpMyAdmin) não desenham losango. Ligam as entidades direto e usam símbolos na ponta da linha:</p>
       <table>
         <tr><th>Ponta da linha</th><th>Significa</th></tr>
-        <tr><td style="font-family:var(--mono)">──||</td><td>exatamente um (1,1)</td></tr>
-        <tr><td style="font-family:var(--mono)">──o|</td><td>zero ou um (0,1)</td></tr>
-        <tr><td style="font-family:var(--mono)">──o&lt;</td><td>zero ou muitos (0,N)</td></tr>
-        <tr><td style="font-family:var(--mono)">──|&lt;</td><td>um ou muitos (1,N)</td></tr>
+        <tr><td style="font-family:var(--mono)">──||</td><td>um</td></tr>
+        <tr><td style="font-family:var(--mono)">──&lt;</td><td>muitos (o "pé de galinha")</td></tr>
       </table>
+      <p class="fonte">Algumas ferramentas acrescentam outros sinais na ponta, como uma bolinha. Para ler o tipo, basta olhar se a ponta é um traço ou um pé de galinha.</p>
     </div>
     <div>
-      <pre class="saida"><code>CLIENTES ||────────o&lt; VENDAS</code></pre>
-      <p>Mesma informação do slide anterior: um cliente, zero ou muitas vendas.</p>
+      <pre class="saida"><code>CLIENTES ||────────&lt; VENDAS</code></pre>
+      <p>Mesma informação do slide da cardinalidade: um cliente, muitas vendas (1:N).</p>
       <div class="caixa">O "pé de galinha" (<code>&lt;</code>) sempre fica do lado <strong>muitos</strong>.</div>
-      <p>Nas aulas usamos (mín,máx). Você precisa saber <strong>ler</strong> as duas.</p>
+      <p>Nas aulas usamos losango com 1 e N. Você precisa saber <strong>ler</strong> as duas.</p>
     </div>
   </div>
   <p class="fonte">Livro, 10.3.5, p. 48.</p>
@@ -242,9 +272,9 @@
 <section class="slide">
   <h2>O relacionamento que tem atributos</h2>
   <div class="der">
-    <span class="entidade">VENDAS</span><span class="liga"><b>(0,N)</b></span>
+    <span class="entidade">VENDAS</span><span class="liga"><b>N</b></span>
     <span class="relacao"><span>contém</span></span>
-    <span class="liga"><b>(1,N)</b></span><span class="entidade">PRODUTOS</span>
+    <span class="liga"><b>N</b></span><span class="entidade">PRODUTOS</span>
   </div>
   <p>Na venda 2, a Auto Peças Curitiba levou <strong>10</strong> correias e <strong>40</strong> velas.</p>
   <div class="duas">
@@ -265,9 +295,9 @@
 <section class="slide">
   <h2>N:N vira duas relações 1:N</h2>
   <div class="der">
-    <span class="entidade">VENDAS</span><span class="liga"><b>(1,N)</b></span>
+    <span class="entidade">VENDAS</span><span class="liga"><b>1</b></span><span class="liga"><b>N</b></span>
     <span class="entidade" style="border-style:double;border-width:.3em">ITENSVENDA</span>
-    <span class="liga"><b>(0,N)</b></span><span class="entidade">PRODUTOS</span>
+    <span class="liga"><b>N</b></span><span class="liga"><b>1</b></span><span class="entidade">PRODUTOS</span>
   </div>
   <table>
     <caption>ItensVenda — a venda 2 em detalhe</caption>
@@ -276,8 +306,8 @@
     <tr><td>4</td><td class="fk">2</td><td class="fk">7 (Vela)</td><td class="num">40</td><td class="num">24.50</td></tr>
   </table>
   <ul>
-    <li>Uma venda tem (1,N) itens; cada item pertence a uma venda.</li>
-    <li>Um produto aparece em (0,N) itens; cada item se refere a um produto.</li>
+    <li>Uma venda tem vários itens; cada item pertence a uma venda → 1:N.</li>
+    <li>Um produto aparece em vários itens; cada item se refere a um produto → 1:N.</li>
   </ul>
   <div class="caixa ideia">Por que guardar <code>PrecoUnitario</code> no item, se o produto já tem preço? Porque o preço do produto <strong>muda</strong>, e a venda precisa lembrar quanto custava <strong>naquele dia</strong>.</div>
 </section>
@@ -285,16 +315,16 @@
 <section class="slide">
   <h2>O DER completo da AutoNex</h2>
   <div class="der" style="gap:0">
-    <span class="entidade">CLIENTES</span><span class="liga"><b>(1,1)</b></span>
-    <span class="relacao"><span>faz</span></span><span class="liga"><b>(0,N)</b></span>
-    <span class="entidade">VENDAS</span><span class="liga"><b>(0,N)</b></span>
-    <span class="relacao"><span>realiza</span></span><span class="liga"><b>(0,1)</b></span>
+    <span class="entidade">CLIENTES</span><span class="liga"><b>1</b></span>
+    <span class="relacao"><span>faz</span></span><span class="liga"><b>N</b></span>
+    <span class="entidade">VENDAS</span><span class="liga"><b>N</b></span>
+    <span class="relacao"><span>realiza</span></span><span class="liga"><b>1</b></span>
     <span class="entidade">FUNCIONÁRIOS</span>
   </div>
   <div class="der">
-    <span class="entidade">VENDAS</span><span class="liga"><b>(1,N)</b></span>
+    <span class="entidade">VENDAS</span><span class="liga"><b>1</b></span><span class="liga"><b>N</b></span>
     <span class="entidade" style="border-style:double;border-width:.3em">ITENSVENDA</span>
-    <span class="liga"><b>(0,N)</b></span><span class="entidade">PRODUTOS</span>
+    <span class="liga"><b>N</b></span><span class="liga"><b>1</b></span><span class="entidade">PRODUTOS</span>
   </div>
   <table>
     <tr><th>Entidade</th><th>Atributos (identificador sublinhado)</th></tr>
@@ -304,7 +334,7 @@
     <tr><td>Vendas</td><td><u>VendaID</u>, DataVenda, TotalVenda</td></tr>
     <tr><td>ItensVenda</td><td><u>ItemVendaID</u>, Quantidade, PrecoUnitario</td></tr>
   </table>
-  <p class="fonte">Livro, cap. 8, p. 29–31. Diferença para o livro: aqui uma venda pode não ter funcionário (0,1) — é uma venda feita pelo site.</p>
+  <p class="fonte">Livro, cap. 8, p. 29–31. Diferença para o livro: aqui uma venda pode não ter funcionário — é uma venda feita pelo site.</p>
   
 </section>
 
@@ -314,7 +344,7 @@
     <li><strong>Leia o texto e sublinhe os substantivos.</strong> Quais têm características próprias? → entidades.</li>
     <li><strong>Liste os atributos</strong> de cada entidade e escolha o identificador.</li>
     <li><strong>Procure os verbos</strong> que ligam duas entidades → relacionamentos.</li>
-    <li><strong>Leia cada relacionamento nos dois sentidos</strong>, começando por "um(a)…", e anote (mín,máx).</li>
+    <li><strong>Leia cada relacionamento nos dois sentidos</strong>, começando por "um(a)…", e anote 1:1, 1:N ou N:N.</li>
     <li><strong>Achou N:N?</strong> Pergunte se o par tem dados próprios. Crie a entidade associativa.</li>
     <li><strong>Confira com o texto:</strong> toda informação pedida tem lugar no desenho?</li>
   </ol>
@@ -327,7 +357,7 @@
   <div class="caixa">
     "A clínica veterinária PetVida cadastra os <strong>tutores</strong> com nome, CPF e telefone. Cada tutor pode ter vários <strong>animais</strong>; de cada animal guardamos nome, espécie, raça e data de nascimento, e todo animal tem exatamente um tutor. A clínica tem vários <strong>veterinários</strong>, com nome, CRMV e especialidade. Um animal passa por <strong>consultas</strong>: cada consulta acontece numa data, é de um animal, é feita por um veterinário e registra o diagnóstico e o valor cobrado."
   </div>
-  <p>Entregue: entidades com atributos e identificador, relacionamentos com (mín,máx) nos dois lados.</p>
+  <p>Entregue: entidades com atributos e identificador, relacionamentos com 1 ou N nos dois lados.</p>
   <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
   
 </section>
@@ -353,13 +383,13 @@
     <div class="explica">Muitos dos dois lados. Vai precisar de uma entidade associativa.</div>
   </div>
   <div class="quiz">
-    <p class="pergunta">3. Na cardinalidade (0,N), o zero significa que a participação é…</p>
+    <p class="pergunta">3. "Um cliente faz várias vendas; uma venda é de um cliente." Isso é…</p>
     <ol>
-      <li>proibida</li>
-      <li data-certa>opcional</li>
-      <li>obrigatória</li>
+      <li>1:1</li>
+      <li data-certa>1:N</li>
+      <li>N:N</li>
     </ol>
-    <div class="explica">Mínimo 0 = pode não haver nenhum. Mínimo 1 = obrigatório.</div>
+    <div class="explica">Muitos de um lado só (vendas). O N fica ao lado de VENDAS.</div>
   </div>
 </section>
 
