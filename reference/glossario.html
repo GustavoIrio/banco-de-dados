@@ -21,10 +21,7 @@
   <dt>Alias <small>aulas 5 e 6</small></dt>
   <dd>Apelido dado a uma coluna (<code>Preco * Estoque AS ValorEmEstoque</code>) ou a uma tabela (<code>FROM Vendas V</code>) dentro de uma consulta.</dd>
 
-  <dt>Anomalia <small>aula 3</small></dt>
-  <dd>Problema causado por redundância numa tabela mal dividida. De atualização (mudar o mesmo dado em várias linhas), de inserção (não conseguir cadastrar algo sem outro dado) e de exclusão (perder um dado ao apagar outro).</dd>
-
-  <dt>Atômico (valor) <small>aulas 1 e 3</small></dt>
+  <dt>Atômico (valor) <small>aula 1</small></dt>
   <dd>Valor indivisível: um só por célula. Uma lista de telefones na mesma célula não é atômica.</dd>
 
   <dt>Atributo <small>aulas 1 e 2</small></dt>
@@ -63,12 +60,6 @@
   <dt>DDL <small>aula 4</small></dt>
   <dd>Data Definition Language. Comandos que definem a estrutura: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>.</dd>
 
-  <dt>Dependência parcial <small>aula 3</small></dt>
-  <dd>Coluna que depende só de parte de uma chave composta. Viola a 2FN.</dd>
-
-  <dt>Dependência transitiva <small>aula 3</small></dt>
-  <dd>Coluna comum que depende de outra coluna comum, e não diretamente da chave. Viola a 3FN.</dd>
-
   <dt>DER <small>aula 2</small></dt>
   <dd>Diagrama entidade-relacionamento. Desenho do modelo conceitual: retângulos (entidades), elipses (atributos), losangos (relacionamentos).</dd>
 
@@ -90,9 +81,6 @@
   <dt>Esquema <small>aulas 1 e 3</small></dt>
   <dd>Descrição da estrutura de uma relação: <code>Produtos(<u>ProdutoID</u>, Nome, Descricao, Preco, Estoque)</code>.</dd>
 
-  <dt>Formas normais <small>aula 3</small></dt>
-  <dd><strong>1FN</strong>: valores atômicos. <strong>2FN</strong>: 1FN e nenhuma dependência parcial. <strong>3FN</strong>: 2FN e nenhuma dependência transitiva. "A chave, a chave inteira e nada além da chave."</dd>
-
   <dt>Grau <small>aula 1</small></dt>
   <dd>Número de atributos de uma relação.</dd>
 
@@ -113,9 +101,6 @@
 
   <dt>Modelo conceitual, lógico e físico <small>aulas 2, 3 e 4</small></dt>
   <dd>Conceitual: o DER. Lógico: tabelas, colunas e chaves. Físico: o script SQL para um SGBD específico.</dd>
-
-  <dt>Normalização <small>aula 3</small></dt>
-  <dd>Processo de aplicar as formas normais para eliminar redundância e anomalias.</dd>
 
   <dt>NoSQL <small>aula 7</small></dt>
   <dd>Bancos não relacionais: chave-valor, documentos, colunas e grafos. Esquema flexível e escala horizontal.</dd>
