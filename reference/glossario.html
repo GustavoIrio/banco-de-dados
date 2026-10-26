@@ -36,12 +36,6 @@
   <dt>Cardinalidade <small>aula 2</small></dt>
   <dd>Quantas ocorrências de uma entidade podem se associar a uma ocorrência da outra: um (1) ou muitos (N). Um cliente compra em N vendas; uma venda é para 1 cliente → 1:N.</dd>
 
-  <dt>Chave alternativa <small>aula 3</small></dt>
-  <dd>Chave candidata que não foi escolhida como primária. Em SQL costuma receber <code>UNIQUE</code>. Ex.: <code>CNPJ</code> em Clientes.</dd>
-
-  <dt>Chave candidata <small>aula 3</small></dt>
-  <dd>Superchave mínima: identifica cada linha e não tem coluna sobrando.</dd>
-
   <dt>Chave composta <small>aulas 3 e 4</small></dt>
   <dd>Chave formada por mais de uma coluna. Ex.: (<code>LivroID</code>, <code>AutorID</code>) em LivrosAutores.</dd>
 
@@ -49,7 +43,7 @@
   <dd>Coluna que guarda o valor da chave primária de outra tabela, criando o relacionamento. <code>Vendas.ClienteID</code> referencia <code>Clientes.ClienteID</code>.</dd>
 
   <dt>Chave primária — PK <small>aulas 1, 3 e 4</small></dt>
-  <dd>A chave candidata escolhida para identificar cada linha. Única, nunca NULL, uma por tabela.</dd>
+  <dd>A coluna (ou colunas) escolhida para identificar cada linha. Única, nunca NULL, uma por tabela.</dd>
 
   <dt>Chave substituta (surrogate) <small>aula 3</small></dt>
   <dd>Coluna criada só para identificar a linha, sem significado no negócio. Ex.: <code>ClienteID</code>.</dd>
@@ -131,9 +125,6 @@
 
   <dt>Subconsulta <small>aula 6</small></dt>
   <dd>Um <code>SELECT</code> dentro de outro, usado com <code>IN</code> ou <code>EXISTS</code>.</dd>
-
-  <dt>Superchave <small>aula 3</small></dt>
-  <dd>Qualquer conjunto de colunas que identifica cada linha de forma única; pode ter colunas sobrando.</dd>
 
   <dt>Trigger (gatilho) <small>aula 7</small></dt>
   <dd>Código que o SGBD executa automaticamente antes ou depois de um <code>INSERT</code>, <code>UPDATE</code> ou <code>DELETE</code>.</dd>
