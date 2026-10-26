@@ -167,7 +167,14 @@
   <div class="caixa">
     "A academia FitLab cadastra seus <strong>alunos</strong> com nome, CPF, data de nascimento e telefone. Os <strong>instrutores</strong> têm nome, CREF e especialidade. A academia oferece <strong>modalidades</strong> (musculação, pilates, natação), cada uma com nome e valor da mensalidade."
   </div>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+    <ul>
+      <li><strong>Alunos</strong>(<u>CPF</u> ou <u>AlunoID</u>, Nome, DataNascimento, Telefone)</li>
+      <li><strong>Instrutores</strong>(<u>CREF</u> ou <u>InstrutorID</u>, Nome, Especialidade)</li>
+      <li><strong>Modalidades</strong>(<u>ModalidadeID</u>, Nome, ValorMensalidade)</li>
+    </ul>
+    <p>"Academia" não é entidade: só existe uma e não guardamos nada sobre ela. "Musculação, pilates, natação" são <em>ocorrências</em> de Modalidades, não entidades.</p>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -260,7 +267,14 @@
     <li><strong>Turma</strong> tem <strong>Aluno</strong> (numa escola em que cada aluno está em uma turma só).</li>
     <li><strong>Médico</strong> atende <strong>Paciente</strong>.</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+    <p>1 — <strong>1:N</strong>: um funcionário realiza várias vendas; uma venda é realizada por um funcionário.<br>
+    2 — <strong>N:N</strong>: um aluno em várias modalidades; uma modalidade com vários alunos.<br>
+    3 — <strong>1:1</strong>.<br>
+    4 — <strong>1:N</strong>: uma turma, vários alunos; um aluno, uma turma.<br>
+    5 — <strong>N:N</strong>: um médico atende vários pacientes; um paciente passa por vários médicos.</p>
+    <p>Repare: a resposta depende da <strong>regra do negócio</strong>. Se a FitLab só permitisse uma modalidade por aluno, o item 2 seria 1:N.</p>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -358,7 +372,17 @@
     "A clínica veterinária PetVida cadastra os <strong>tutores</strong> com nome, CPF e telefone. Cada tutor pode ter vários <strong>animais</strong>; de cada animal guardamos nome, espécie, raça e data de nascimento, e todo animal tem exatamente um tutor. A clínica tem vários <strong>veterinários</strong>, com nome, CRMV e especialidade. Um animal passa por <strong>consultas</strong>: cada consulta acontece numa data, é de um animal, é feita por um veterinário e registra o diagnóstico e o valor cobrado."
   </div>
   <p>Entregue: entidades com atributos e identificador, relacionamentos com 1 ou N nos dois lados.</p>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta" data-rotulo="Mostrar uma solução">
+    <div class="der" style="font-size:.7em">
+      <span class="entidade">TUTORES</span><span class="liga"><b>1</b></span>
+      <span class="relacao"><span>possui</span></span><span class="liga"><b>N</b></span>
+      <span class="entidade">ANIMAIS</span><span class="liga"><b>1</b></span><span class="liga"><b>N</b></span>
+      <span class="entidade" style="border-style:double;border-width:.3em">CONSULTAS</span><span class="liga"><b>N</b></span><span class="liga"><b>1</b></span>
+      <span class="entidade">VETERINÁRIOS</span>
+    </div>
+    <p>Tutores(<u>TutorID</u>, Nome, CPF, Telefone) · Animais(<u>AnimalID</u>, Nome, Especie, Raca, DataNascimento) · Veterinarios(<u>VeterinarioID</u>, Nome, CRMV, Especialidade) · Consultas(<u>ConsultaID</u>, DataConsulta, Diagnostico, Valor)</p>
+    <p>Consultas é a entidade associativa do N:N entre Animais e Veterinários: um animal vê vários veterinários, um veterinário vê vários animais, e o par tem dados próprios (data, diagnóstico, valor).</p>
+  </div>
   
 </section>
 
@@ -409,9 +433,9 @@
       <div class="caixa ideia">
         <span class="rotulo">Próxima aula</span>
         O DER ainda não é tabela. Na aula 3 transformamos o desenho em <strong>tabelas com chaves</strong>: o que identifica cada linha e o que liga uma tabela à outra.
-        <br>Aula 3 → · <a href="0001-do-arquivo-ao-banco.html">← Aula 1</a>
+        <br><a href="0003-chaves-e-tabelas.html">Aula 3 →</a> · <a href="0001-do-arquivo-ao-banco.html">← Aula 1</a>
       </div>
-      <p class="fonte">Guarde o DER da PetVida: ele volta na aula 3. Dúvidas sobre o material? Pergunte ao professor.</p>
+      <p class="fonte">Dúvidas sobre o material? Pergunte ao professor.</p>
     </div>
   </div>
 </section>

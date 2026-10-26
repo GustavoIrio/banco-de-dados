@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 3 — Chaves e tabelas na BiblioTech</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0003-chaves-e-tabelas.html">Aula 3</a> · <a href="../reference/glossario.html">Glossário</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 3</span>
+  <h1>Chaves e tabelas na BiblioTech</h1>
+  <p class="sub">Do DER ao esquema lógico: chaves, tipos e NULL</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<p class="nao-imprime caixa">Prefere responder no computador? <a href="lista-03.docx">Baixe a versão editável (Word)</a>, responda no próprio arquivo e entregue como o professor pedir.</p>
+
+<h2>Parte A — Chaves</h2>
+<ol class="questoes">
+  <li>Regras do negócio: a matrícula é única por aluno; o e-mail, quando existe, é pessoal. Observe a tabela. <span class="nivel">básico</span>
+    <table>
+      <caption>Alunos</caption>
+      <tr><th>AlunoID</th><th>Nome</th><th>Matricula</th><th>Turma</th><th>Email</th></tr>
+      <tr><td>1</td><td>Bruno Almeida</td><td>240001</td><td>DS-1A</td><td>bruno@escola.com.br</td></tr>
+      <tr><td>2</td><td>Camila Rocha</td><td>240002</td><td>DS-1A</td><td>camila@escola.com.br</td></tr>
+      <tr><td>3</td><td>Diego Martins</td><td>240003</td><td>DS-1B</td><td class="nulo">NULL</td></tr>
+    </table>
+    (a) Quais colunas, sozinhas, nunca se repetem e poderiam identificar cada aluno?
+    <br>(b) Qual você escolheria como chave primária? Por quê?
+    <br>(c) Por que a coluna <code>Email</code> <strong>não</strong> serve como chave primária?
+    
+  </li>
+  <li>Explique a diferença entre <strong>chave primária</strong> e <strong>chave estrangeira</strong> usando as tabelas Alunos e Emprestimos como exemplo. <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — Esquema lógico da BiblioTech</h2>
+<ol class="questoes" style="counter-reset: q 2">
+  <li>Com base neste DER da BiblioTech, monte o <strong>esquema lógico</strong>: escreva cada tabela com suas colunas e marque a PK e as FKs, como em <code>Animais(AnimalID PK, TutorID FK, Nome, …)</code>. Lembre das três regras (entidade → tabela; 1:N → FK no lado N; N:N → tabela associativa). <span class="nivel">intermediário</span>
+    <div class="der" id="der-bibliotech" style="font-size:.75em;margin:.8em 0">
+      <span class="entidade">ALUNOS</span><span class="liga"><b>1</b></span><span class="liga"><b>N</b></span>
+      <span class="entidade" style="border-style:double;border-width:.3em">EMPRÉSTIMOS</span><span class="liga"><b>N</b></span><span class="liga"><b>1</b></span>
+      <span class="entidade">LIVROS</span><span class="liga"><b>N</b></span>
+      <span class="relacao"><span>escrito por</span></span><span class="liga"><b>N</b></span>
+      <span class="entidade">AUTORES</span>
+    </div>
+    <p>Alunos(<u>AlunoID</u>, Nome, Matricula, Turma, Email)<br>Emprestimos(<u>EmprestimoID</u>, DataEmprestimo, DataDevolucao)<br>Livros(<u>LivroID</u>, Titulo, ISBN, AnoPublicacao, Exemplares)<br>Autores(<u>AutorID</u>, Nome, Nacionalidade)</p>
+    
+  </li>
+  <li>Na tabela que resolve o N:N entre Livros e Autores, use uma <strong>chave primária composta</strong> pelas duas FKs. O que essa escolha impede de acontecer? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Para cada coluna do seu esquema, escolha o <strong>tipo de dado</strong> e diga se é <code>NOT NULL</code>. Justifique o tipo de <code>ISBN</code> e de <code>Matricula</code>. <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Qual coluna da BiblioTech <strong>precisa</strong> aceitar NULL? O que o NULL significa nela? <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+</body>
+</html>
