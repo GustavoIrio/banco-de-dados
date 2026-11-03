@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 4 — Criando a BiblioTech em SQL</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0004-ddl-criando-o-banco.html">Aula 4</a> · <a href="../reference/cola-sql.html">Cola de SQL</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 4</span>
+  <h1>Criando a BiblioTech em SQL</h1>
+  <p class="sub">DDL: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code> e restrições</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<p class="nao-imprime caixa">Prefere responder no computador? <a href="lista-04.docx">Baixe a versão editável (Word)</a>, responda no próprio arquivo e entregue como o professor pedir.</p>
+
+<p>Teste os comandos em <strong>onecompiler.com/mysql</strong>. Lembre: cada Run começa do zero e para no primeiro erro, então deixe no editor todos os comandos, na ordem em que devem ser executados.</p>
+
+<div class="der" style="font-size:.62em">
+  <span class="entidade">ALUNOS</span><span class="liga"><b>1</b></span>
+  <span class="relacao"><span>faz</span></span><span class="liga"><b>N</b></span>
+  <span class="entidade">EMPRÉSTIMOS</span><span class="liga"><b>N</b></span>
+  <span class="relacao"><span>é de</span></span><span class="liga"><b>1</b></span>
+  <span class="entidade">LIVROS</span><span class="liga"><b>N</b></span>
+  <span class="relacao"><span>escrito por</span></span><span class="liga"><b>1</b></span>
+  <span class="entidade">AUTORES</span>
+</div>
+
+<div class="der" style="font-size:.85em;gap:1em;align-items:flex-start;flex-wrap:wrap">
+  <div class="tabela-der"><h4>Alunos</h4><ul><li class="pk">AlunoID</li><li class="col">Nome</li><li class="col">Matricula</li><li class="col">Turma</li><li class="col">Email</li></ul></div>
+  <div class="tabela-der"><h4>Emprestimos</h4><ul><li class="pk">EmprestimoID</li><li class="fk">AlunoID</li><li class="fk">LivroID</li><li class="col">DataEmprestimo</li><li class="col">DataDevolucao</li></ul></div>
+  <div class="tabela-der"><h4>Livros</h4><ul><li class="pk">LivroID</li><li class="fk">AutorID</li><li class="col">Titulo</li><li class="col">ISBN</li><li class="col">AnoPublicacao</li><li class="col">Exemplares</li></ul></div>
+  <div class="tabela-der"><h4>Autores</h4><ul><li class="pk">AutorID</li><li class="col">Nome</li><li class="col">Nacionalidade</li></ul></div>
+</div>
+
+<h2>Parte A — Planejar</h2>
+<ol class="questoes">
+  <li>Em que <strong>ordem</strong> as quatro tabelas precisam ser criadas? Justifique. <span class="nivel">básico</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — Criar</h2>
+<ol class="questoes" style="counter-reset: q 1">
+  <li>Crie as tabelas <strong>Alunos</strong>, <strong>Autores</strong> e <strong>Livros</strong>. Regras: PKs automáticas; nome, matrícula, turma, título e ISBN obrigatórios; matrícula e ISBN não se repetem; <code>Exemplares</code> obrigatório, com valor padrão 1; todo livro tem um autor (FK nomeada). <span class="nivel">prática</span>
+    
+  </li>
+  <li>Crie a tabela <strong>Emprestimos</strong> com as duas chaves estrangeiras nomeadas. A data de devolução deve aceitar NULL. <span class="nivel">prática</span>
+    
+  </li>
+</ol>
+
+<h2>Parte C — Alterar e testar</h2>
+<ol class="questoes" style="counter-reset: q 3">
+  <li>A bibliotecária pediu: (a) guardar o <strong>telefone</strong> dos alunos; (b) aumentar o título dos livros para 200 caracteres, mantendo obrigatório. Escreva os dois comandos. <span class="nivel">prática</span>
+    
+  </li>
+  <li>A bibliotecária quer testar um novo campo nos livros: (a) adicione a coluna <code>Editora</code>, texto de até 100 caracteres, em <code>Livros</code>; (b) confira com <code>DESCRIBE Livros</code>. <span class="nivel">prática</span>
+    
+  </li>
+  <li>Acrescente <code>DROP TABLE Livros;</code> no fim do script. O que aconteceu e por quê? Em que ordem as quatro tabelas teriam de ser apagadas? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>A bibliotecária mudou de ideia sobre os dois campos novos. Apague do script o <code>DROP TABLE</code> da questão anterior, que deu erro, e remova as colunas <code>Telefone</code> de Alunos e <code>Editora</code> de Livros. Confira com <code>DESCRIBE</code>. <span class="nivel">prática</span>
+    
+  </li>
+</ol>
+
+<h2>Parte D — Desafio: PetVida em SQL</h2>
+<ol class="questoes" style="counter-reset: q 7">
+  <li>Agora um banco inteiro, em um script novo. Crie as três tabelas da clínica veterinária PetVida com base neste diagrama. <span class="nivel">desafio</span>
+    <div class="der" style="font-size:.7em;margin:.8em 0">
+      <span class="entidade">TUTORES</span><span class="liga"><b>1</b></span>
+      <span class="relacao"><span>possui</span></span><span class="liga"><b>N</b></span>
+      <span class="entidade">ANIMAIS</span><span class="liga"><b>1</b></span>
+      <span class="relacao"><span>tem</span></span><span class="liga"><b>N</b></span>
+      <span class="entidade">CONSULTAS</span>
+    </div>
+    <p>Tutores(<u>TutorID</u>, Nome, CPF, Telefone)<br>Animais(<u>AnimalID</u>, Nome, Especie, Raca, DataNascimento)<br>Consultas(<u>ConsultaID</u>, DataConsulta, Diagnostico, Valor)</p>
+    (a) Decida onde ficam as FKs e a <strong>ordem</strong> de criação.
+    <br>(b) Todas as PKs automáticas. O CPF não se repete.
+    
+  </li>
+</ol>
+</body>
+</html>

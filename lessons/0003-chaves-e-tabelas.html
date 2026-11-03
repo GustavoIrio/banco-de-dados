@@ -144,7 +144,11 @@
     <li>Qual você escolheria como chave primária? Por quê?</li>
     <li>E as outras colunas do item 1: o banco deve deixar que se repitam?</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+    <p>1 — <code>FuncionarioID</code>, <code>CPF</code> e <code>Email</code>. Nome não (podem existir homônimos); Cargo não (vários vendedores).<br>
+    2 — <code>FuncionarioID</code>: curta, numérica, sem significado e não muda. E-mail pode mudar; CPF é dado pessoal, melhor não espalhar por outras tabelas como FK.<br>
+    3 — Não: CPF e Email continuam sem poder repetir. Na aula 4 eles recebem <code>UNIQUE</code>.</p>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -327,7 +331,15 @@ SELECT NULL = NULL;  -- NULL</code></pre>
       <li>Escolha os tipos e marque os <code>NOT NULL</code>.</li>
     </ol>
   </div>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta" data-rotulo="Mostrar uma solução">
+    <div class="der" style="font-size:.85em;gap:1.2em;align-items:flex-start">
+      <div class="tabela-der"><h4>Tutores</h4><ul><li class="pk">TutorID INT</li><li class="col">Nome VARCHAR(100)</li><li class="col">CPF CHAR(11)</li><li class="col">Telefone VARCHAR(20)</li></ul></div>
+      <div class="tabela-der"><h4>Animais</h4><ul><li class="pk">AnimalID INT</li><li class="fk">TutorID INT</li><li class="col">Nome VARCHAR(60)</li><li class="col">Especie VARCHAR(40)</li><li class="col">Raca VARCHAR(40)</li><li class="col">DataNascimento DATE</li></ul></div>
+      <div class="tabela-der"><h4>Consultas</h4><ul><li class="pk">ConsultaID INT</li><li class="fk">AnimalID INT</li><li class="fk">VeterinarioID INT</li><li class="col">DataConsulta DATE</li><li class="col">Diagnostico TEXT</li><li class="col">Valor DECIMAL(10,2)</li></ul></div>
+      <div class="tabela-der"><h4>Veterinarios</h4><ul><li class="pk">VeterinarioID INT</li><li class="col">Nome VARCHAR(100)</li><li class="col">CRMV VARCHAR(10)</li><li class="col">Especialidade VARCHAR(60)</li></ul></div>
+    </div>
+    <p>As três FKs são NOT NULL: todo animal tem tutor, e toda consulta é de um animal e feita por um veterinário. Raca, DataNascimento e Diagnostico podem ser NULL.</p>
+  </div>
 </section>
 
 <section class="slide">
@@ -377,7 +389,7 @@ SELECT NULL = NULL;  -- NULL</code></pre>
       <div class="caixa ideia">
         <span class="rotulo">Próxima aula</span>
         Voltamos ao XAMPP. Na aula 4 o esquema lógico vira <strong>banco de verdade</strong>: <code>CREATE TABLE</code> com chaves primárias, estrangeiras e restrições.
-        <br>Aula 4 → · <a href="0002-modelagem-er.html">← Aula 2</a>
+        <br><a href="0004-ddl-criando-o-banco.html">Aula 4 →</a> · <a href="0002-modelagem-er.html">← Aula 2</a>
       </div>
       <p class="fonte">Traga o esquema da PetVida e o da BiblioTech: vamos criá-los em SQL. Dúvidas sobre o material? Pergunte ao professor.</p>
     </div>
