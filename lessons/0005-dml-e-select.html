@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 5 — DML e SELECT: dados entrando e saindo</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="deck">
+
+<section class="slide capa">
+  <span class="rotulo">UC4 · Banco de Dados · Aula 5 de 7</span>
+  <h1>DML e SELECT</h1>
+  <p class="sub">Inserir, consultar com filtros, alterar e apagar — sem destruir nada por acidente</p>
+  <p class="meta">Hoje você sai com: a AutoNex cheia de dados e a capacidade de responder perguntas do negócio com <code>SELECT … WHERE … ORDER BY</code>.<br>
+  Livro: capítulos 11.2 e 11.3 (p. 54–58, 64–68)</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Antes de começar: o que ficou das aulas anteriores?</h2>
+  <div class="quiz">
+    <p class="pergunta">1. (Aula 4) Por que <code>DROP TABLE Clientes</code> foi recusado?</p>
+    <ol>
+      <li>Porque a tabela tinha linhas dentro dela</li>
+      <li data-certa>Porque Vendas referencia Clientes por FK</li>
+      <li>Porque faltava o <code>IF EXISTS</code> no comando</li>
+    </ol>
+    <div class="explica">Integridade referencial: não se apaga a tabela para a qual outra aponta.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. (Aula 3) Como se testa se uma coluna está sem valor?</p>
+    <ol>
+      <li><code>Email = NULL</code></li>
+      <li><code>Email = ''</code></li>
+      <li data-certa><code>Email IS NULL</code></li>
+    </ol>
+    <div class="explica">Comparação com <code>=</code> contra NULL dá NULL, nunca verdadeiro.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. (Aula 4) Escreva de memória: a linha que cria a FK de Vendas para Clientes.</p>
+    <ol><li data-certa>Conferir a resposta</li></ol>
+    <div class="explica"><code>FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID)</code></div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Seu ponto de partida: a AutoNex da aula 4</h2>
+  <div class="duas">
+    <div>
+      <ol>
+        <li>Abra <strong>onecompiler.com/mysql</strong> e apague o exemplo.</li>
+        <li>Clique em <strong>Copiar</strong> e cole o script no editor.</li>
+        <li>Clique em <strong>Run</strong>. Sem erro? As quatro tabelas existem, vazias.</li>
+      </ol>
+      <div class="caixa ideia">Deixe este script <strong>sempre no topo</strong> do editor e escreva os seus <code>INSERT</code> embaixo dele. Cada Run recria as tabelas e roda tudo de novo.</div>
+      <p class="fonte">Arquivo: <a href="../reference/autonex-aula4.sql">autonex-aula4.sql</a></p>
+    </div>
+    <div>
+      <pre class="copiar" data-arquivo="autonex-aula4.sql"><code class="sql">-- =====================================================================
+-- AutoNex — estrutura criada na aula 4 (4 tabelas)
+-- Para o MySQL de onecompiler.com/mysql: cole tudo no editor e clique Run.
+-- Cada Run começa com o banco vazio: deixe estes comandos no topo do
+-- editor e escreva os seus (INSERT, SELECT...) logo abaixo.
+-- =====================================================================
+
+CREATE TABLE Clientes (
+    ClienteID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100) NOT NULL,
+    CNPJ      CHAR(14)     NOT NULL UNIQUE,
+    Endereco  VARCHAR(255),
+    Cidade    VARCHAR(100),
+    Estado    CHAR(2),
+    CEP       CHAR(8),
+    Telefone  VARCHAR(20),
+    Email     VARCHAR(100)
+);
+
+CREATE TABLE Funcionarios (
+    FuncionarioID   INT AUTO_INCREMENT PRIMARY KEY,
+    Nome            VARCHAR(100)  NOT NULL,
+    Cargo           VARCHAR(50)   NOT NULL,
+    Salario         DECIMAL(10,2) NOT NULL,
+    DataContratacao DATE          NOT NULL,
+    Telefone        VARCHAR(20),
+    Email           VARCHAR(100)
+);
+
+CREATE TABLE Produtos (
+    ProdutoID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100)  NOT NULL,
+    Descricao TEXT,
+    Preco     DECIMAL(10,2) NOT NULL,
+    Estoque   INT           NOT NULL DEFAULT 0
+);
+
+CREATE TABLE Vendas (
+    VendaID       INT AUTO_INCREMENT PRIMARY KEY,
+    ClienteID     INT           NOT NULL,
+    FuncionarioID INT           NULL,       -- NULL = venda feita pelo site
+    DataVenda     DATE          NOT NULL,
+    TotalVenda    DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_vendas_cliente
+        FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID),
+    CONSTRAINT fk_vendas_funcionario
+        FOREIGN KEY (FuncionarioID) REFERENCES Funcionarios(FuncionarioID)
+);</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 1 · 35 min</span>
+  <h2>INSERT: colocando dados</h2>
+  <p>As quatro tabelas existem. Estão vazias.</p>
+</section>
+
+<section class="slide">
+  <h2>INSERT com lista de colunas</h2>
+<pre><code class="sql">INSERT INTO Produtos (Nome, Descricao, Preco, Estoque)
+VALUES ('Correia de distribuição',
+        'Correia dentada que sincroniza o motor', 512.05, 200);</code></pre>
+  <ul>
+    <li><strong>Não informamos <code>ProdutoID</code></strong>: o <code>AUTO_INCREMENT</code> gera.</li>
+    <li>A ordem dos valores segue a ordem da <strong>lista de colunas</strong>, não a da tabela.</li>
+    <li>Texto e data entre aspas simples: <code>'2024-03-04'</code>. Número sem aspas, com <strong>ponto</strong> decimal.</li>
+  </ul>
+  <div class="caixa aviso">
+    <span class="rotulo">Sempre escreva a lista de colunas</span>
+    Sem a lista, o SGBD espera um valor para <strong>todas</strong> as colunas, na ordem da tabela, inclusive o ID. Faltou um? Erro de contagem de colunas.
+  </div>
+  <p class="fonte">Livro, cap. 11.2, p. 55 · <a href="https://dev.mysql.com/doc/refman/8.4/en/insert.html">MySQL: INSERT</a></p>
+  
+</section>
+
+<section class="slide">
+  <h2>Várias linhas, valores opcionais</h2>
+<pre><code class="sql">INSERT INTO Clientes (Nome, CNPJ, Cidade, Estado, Telefone, Email) VALUES
+('BS Serviços Automotivos ME', '48996633000128', 'Bauru',    'SP', '1435192270', 'contato@bsmec.com.br'),
+('Auto Peças Curitiba Ltda',   '11222000133',    'Curitiba', 'PR', '4133221100', 'vendas@apcuritiba.com.br'),
+('Oficina Fernanda & Filhos',  '33444000155',    'Londrina', 'PR', '43992224455', NULL);</code></pre>
+  <ul>
+    <li>Um <code>INSERT</code> pode trazer várias linhas, separadas por vírgula.</li>
+    <li>Coluna que <strong>ficou fora da lista</strong> (<code>Endereco</code>, <code>CEP</code>) recebe NULL, ou o <code>DEFAULT</code> se houver.</li>
+    <li>Para deixar vazio de propósito, escreva <code>NULL</code> <strong>sem aspas</strong>. <code>'NULL'</code> é um texto de quatro letras.</li>
+  </ul>
+  <div class="caixa ideia">
+    <span class="rotulo">A ordem importa de novo</span>
+    Por causa das FKs: primeiro Clientes e Funcionarios; depois Vendas. Não dá para registrar a venda de um cliente que ainda não foi inserido.
+  </div>
+</section>
+
+<section class="slide exercicio">
+  <h2>Registre uma venda completa</h2>
+  <p><span class="timer" data-min="12"></span> &nbsp;A Agata Silva (vendedora, R$ 3.200,00, contratada em 15/01/2020) vendeu hoje para a BS Serviços <strong>4 correias de distribuição</strong> a R$ 512,05 cada.</p>
+  <p>Escreva os <code>INSERT</code> necessários, na ordem certa. Você já tem o cliente (ID 1) dos slides anteriores.</p>
+  <p>Dica: depois de cada <code>INSERT</code>, faça <code>SELECT * FROM tabela;</code> para descobrir o ID gerado.</p>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Todo mundo com os mesmos dados</h2>
+  <p>Para que os resultados sejam iguais na sala inteira, troque o script do editor pelo banco oficial: a mesma estrutura, já com dados.</p>
+  <div class="duas">
+    <div>
+      <ol>
+        <li>Clique em <strong>Copiar</strong> e cole no lugar de <strong>tudo</strong> o que está no editor.</li>
+        <li>Embaixo, escreva <code>SELECT * FROM Produtos;</code> e clique em <strong>Run</strong>: devem vir 8 linhas.</li>
+      </ol>
+      <table>
+        <tr><th>Tabela</th><th class="num">Linhas</th></tr>
+        <tr><td>Clientes</td><td class="num">6</td></tr>
+        <tr><td>Funcionarios</td><td class="num">5</td></tr>
+        <tr><td>Produtos</td><td class="num">8</td></tr>
+        <tr><td>Vendas</td><td class="num">8</td></tr>
+      </table>
+      <p class="fonte">Arquivo: <a href="../reference/autonex.sql">autonex.sql</a>. É o "botão de reset": cada Run recria tudo do zero.</p>
+    </div>
+    <div>
+      <pre class="copiar" data-arquivo="autonex.sql"><code class="sql">-- =====================================================================
+-- AutoNex — banco de exemplo do curso (UC4 Banco de Dados)
+-- Estrutura da aula 4 (4 tabelas) + os dados usados nas aulas 5 e 6.
+-- Para o MySQL de onecompiler.com/mysql: cole tudo no editor e clique Run.
+-- Cada Run recria tudo do zero: este script é o "botão de reset".
+-- Escreva suas consultas logo abaixo da última linha.
+-- =====================================================================
+
+-- ---------- Estrutura (DDL) ----------
+
+CREATE TABLE Clientes (
+    ClienteID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100) NOT NULL,
+    CNPJ      CHAR(14)     NOT NULL UNIQUE,
+    Endereco  VARCHAR(255),
+    Cidade    VARCHAR(100),
+    Estado    CHAR(2),
+    CEP       CHAR(8),
+    Telefone  VARCHAR(20),
+    Email     VARCHAR(100)
+);
+
+CREATE TABLE Funcionarios (
+    FuncionarioID   INT AUTO_INCREMENT PRIMARY KEY,
+    Nome            VARCHAR(100)  NOT NULL,
+    Cargo           VARCHAR(50)   NOT NULL,
+    Salario         DECIMAL(10,2) NOT NULL,
+    DataContratacao DATE          NOT NULL,
+    Telefone        VARCHAR(20),
+    Email           VARCHAR(100)
+);
+
+CREATE TABLE Produtos (
+    ProdutoID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100)  NOT NULL,
+    Descricao TEXT,
+    Preco     DECIMAL(10,2) NOT NULL,
+    Estoque   INT           NOT NULL DEFAULT 0
+);
+
+CREATE TABLE Vendas (
+    VendaID       INT AUTO_INCREMENT PRIMARY KEY,
+    ClienteID     INT           NOT NULL,
+    FuncionarioID INT           NULL,       -- NULL = venda feita pelo site
+    DataVenda     DATE          NOT NULL,
+    TotalVenda    DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_vendas_cliente
+        FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID),
+    CONSTRAINT fk_vendas_funcionario
+        FOREIGN KEY (FuncionarioID) REFERENCES Funcionarios(FuncionarioID)
+);
+
+-- ---------- Dados (DML) ----------
+
+INSERT INTO Clientes (Nome, CNPJ, Endereco, Cidade, Estado, CEP, Telefone, Email) VALUES
+('BS Serviços Automotivos ME',  '48996633000128', 'Rua Doze, 196',           'Bauru',     'SP', '17035640', '1435192270',  'contato@bsmec.com.br'),
+('Auto Peças Curitiba Ltda',    '11222000133',    'Av. das Torres, 1500',    'Curitiba',  'PR', '80666070', '4133221100',  'vendas@apcuritiba.com.br'),
+('Mecânica do Ademar',          '22333000144',    'Rua XV de Novembro, 45',  'Curitiba',  'PR', '80777080', '41991112233', 'ademar@mecanica.com.br'),
+('Oficina Fernanda &amp; Filhos',   '33444000155',    'Rua das Flores, 820',     'Londrina',  'PR', '86010000', '43992224455', NULL),
+('Retífica Carmen',             '44555000166',    'Av. Brasil, 3010',        'Maringá',   'PR', '87013000', NULL,          'carmen@retifica.com.br'),
+('Centro Automotivo Joinville', '55666000177',    'Rua do Príncipe, 12',     'Joinville', 'SC', '89201000', '4734556677',  'contato@cajoinville.com.br');
+
+INSERT INTO Funcionarios (Nome, Cargo, Salario, DataContratacao, Telefone, Email) VALUES
+('Agata Silva',       'Vendedora',         3200.00, '2020-01-15', '41988880001', 'agata@autonex.com.br'),
+('Joaquim Silveira',  'Vendedor',          2900.00, '2021-06-01', '41988880002', 'joaquim@autonex.com.br'),
+('Ruan Carlos Costa', 'Gerente de Vendas', 6500.00, '2018-03-12', '41988880003', 'ruan@autonex.com.br'),
+('Carmen Moura',      'Vendedora',         3100.00, '2022-09-05', '41988880004', 'carmen@autonex.com.br'),
+('Fernanda Lemes',    'Estagiária',        1400.00, '2024-02-19', NULL,          'fernanda@autonex.com.br');
+
+INSERT INTO Produtos (Nome, Descricao, Preco, Estoque) VALUES
+('Correia de distribuição',      'Correia dentada que sincroniza o motor',   512.05, 200),
+('Pneu X 205/55 R16',            'Pneu de alta performance',                 350.00, 100),
+('Filtro de óleo',               'Filtro para motores 1.0 a 2.0',             38.90, 500),
+('Pastilha de freio dianteira',  'Jogo com 4 pastilhas',                     189.90, 150),
+('Bateria 60Ah',                 'Bateria selada, 18 meses de garantia',     620.00,  40),
+('Amortecedor traseiro',         'Amortecedor a gás',                        430.00,  12),
+('Vela de ignição',              'Vela de níquel',                            24.50, 800),
+('Palheta limpador',             'Palheta de silicone 20 polegadas',          59.90,   0);
+
+INSERT INTO Vendas (ClienteID, FuncionarioID, DataVenda, TotalVenda) VALUES
+(1, 1,    '2024-03-04', 1477.80),
+(2, 2,    '2024-03-11', 6100.50),
+(3, 1,    '2024-04-02',  379.80),
+(2, 3,    '2024-04-18', 5440.00),
+(4, 4,    '2024-05-09',  781.00),
+(1, NULL, '2024-05-21',  700.00),
+(5, 2,    '2024-06-03', 1783.70),
+(3, 1,    '2024-06-17',  620.00);</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 2 · 40 min</span>
+  <h2>SELECT: fazendo perguntas</h2>
+  <p>Guardar dado é metade do trabalho. A outra metade é achar o que interessa.</p>
+</section>
+
+<section class="slide">
+  <h2>A estrutura de uma consulta</h2>
+<pre><code class="sql">SELECT coluna1, coluna2      -- o que eu quero ver
+FROM tabela                  -- de onde
+WHERE condição               -- quais linhas
+ORDER BY coluna;             -- em que ordem</code></pre>
+  <div class="duas">
+    <div>
+<pre><code class="sql">SELECT Nome, Cidade
+FROM Clientes
+WHERE Estado = 'PR'
+ORDER BY Nome;</code></pre>
+    </div>
+    <div>
+      <table>
+        <tr><th>Nome</th><th>Cidade</th></tr>
+        <tr><td>Auto Peças Curitiba Ltda</td><td>Curitiba</td></tr>
+        <tr><td>Mecânica do Ademar</td><td>Curitiba</td></tr>
+        <tr><td>Oficina Fernanda &amp; Filhos</td><td>Londrina</td></tr>
+        <tr><td>Retífica Carmen</td><td>Maringá</td></tr>
+      </table>
+    </div>
+  </div>
+  <p>O <code>WHERE</code> funciona como um <code>if</code> aplicado a cada linha: só passa quem torna a condição <strong>verdadeira</strong>.</p>
+  <p class="fonte">Livro, cap. 11.3, p. 56 e 58 · <a href="https://dev.mysql.com/doc/refman/8.4/en/select.html">MySQL: SELECT</a></p>
+</section>
+
+<section class="slide">
+  <h2>Operadores de comparação e lógicos</h2>
+  <div class="duas">
+    <div>
+      <table>
+        <tr><th>Operador</th><th>Significa</th></tr>
+        <tr><td><code>=</code></td><td>igual</td></tr>
+        <tr><td><code>&lt;&gt;</code> ou <code>!=</code></td><td>diferente</td></tr>
+        <tr><td><code>&gt;</code> &nbsp; <code>&gt;=</code></td><td>maior, maior ou igual</td></tr>
+        <tr><td><code>&lt;</code> &nbsp; <code>&lt;=</code></td><td>menor, menor ou igual</td></tr>
+        <tr><td><code>AND</code></td><td>as duas condições</td></tr>
+        <tr><td><code>OR</code></td><td>pelo menos uma</td></tr>
+        <tr><td><code>NOT</code></td><td>inverte</td></tr>
+      </table>
+    </div>
+    <div>
+      <p>Produtos caros <strong>e</strong> com pouco estoque:</p>
+<pre><code class="sql">SELECT Nome, Preco, Estoque
+FROM Produtos
+WHERE Preco > 400 AND Estoque < 50;</code></pre>
+      <table>
+        <tr><th>Nome</th><th class="num">Preco</th><th class="num">Estoque</th></tr>
+        <tr><td>Bateria 60Ah</td><td class="num">620.00</td><td class="num">40</td></tr>
+        <tr><td>Amortecedor traseiro</td><td class="num">430.00</td><td class="num">12</td></tr>
+      </table>
+      <div class="caixa aviso">Misturou <code>AND</code> com <code>OR</code>? Use <strong>parênteses</strong>. O <code>AND</code> é avaliado antes do <code>OR</code>.</div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 58.</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Colunas calculadas e apelidos</h2>
+  <p>O <code>SELECT</code> também faz conta. <code>AS</code> dá um nome (<em class="termo">alias</em>) à coluna do resultado.</p>
+<pre><code class="sql">SELECT Nome,
+       Preco,
+       Estoque,
+       Preco * Estoque AS ValorEmEstoque
+FROM Produtos
+WHERE Estoque > 0 AND Estoque <= 100;</code></pre>
+  <table>
+    <tr><th>Nome</th><th class="num">Preco</th><th class="num">Estoque</th><th class="num">ValorEmEstoque</th></tr>
+    <tr><td>Pneu X 205/55 R16</td><td class="num">350.00</td><td class="num">100</td><td class="num">35000.00</td></tr>
+    <tr><td>Bateria 60Ah</td><td class="num">620.00</td><td class="num">40</td><td class="num">24800.00</td></tr>
+    <tr><td>Amortecedor traseiro</td><td class="num">430.00</td><td class="num">12</td><td class="num">5160.00</td></tr>
+  </table>
+<pre><code class="sql">SELECT CONCAT(Nome, ' - ', Cargo) AS Cracha FROM Funcionarios;   -- CONCAT junta textos</code></pre>
+  <p class="fonte">Livro, cap. 11.3, p. 56 e 63.</p>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Responda com SELECT</h2>
+  <p><span class="timer" data-min="12"></span> &nbsp;Uma consulta para cada pergunta. Confira o número de linhas.</p>
+  <ol>
+    <li>Nome e salário dos funcionários que ganham mais de R$ 3.000,00.</li>
+    <li>Todas as colunas das vendas feitas a partir de 1º de maio de 2024.</li>
+    <li>Nome e e-mail dos clientes de Curitiba.</li>
+    <li>Nome dos produtos que custam menos de R$ 100,00 <strong>ou</strong> estão sem estoque.</li>
+    <li>Nome do funcionário e o salário anual (12 × salário), com o nome <code>SalarioAnual</code>.</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Intervalo · 20 min</span>
+  <h2>Na volta: filtros mais espertos</h2>
+  <p>E depois, os dois comandos mais perigosos do SQL.</p>
+</section>
+
+<section class="slide">
+  <h2>BETWEEN, IN e LIKE</h2>
+  <div class="tres">
+    <div>
+      <p><strong>Faixa de valores</strong></p>
+<pre><code class="sql">SELECT Nome, Preco
+FROM Produtos
+WHERE Preco
+  BETWEEN 100 AND 500;</code></pre>
+      <p class="fonte">Inclui os extremos. Traz Pneu X, Pastilha e Amortecedor.</p>
+    </div>
+    <div>
+      <p><strong>Lista de valores</strong></p>
+<pre><code class="sql">SELECT Nome, Cargo
+FROM Funcionarios
+WHERE Cargo IN
+  ('Vendedor',
+   'Vendedora');</code></pre>
+      <p class="fonte">Equivale a vários <code>OR</code>. Traz Agata, Joaquim e Carmen.</p>
+    </div>
+    <div>
+      <p><strong>Pedaço de texto</strong></p>
+<pre><code class="sql">SELECT Nome
+FROM Produtos
+WHERE Nome
+  LIKE 'P%';</code></pre>
+      <p class="fonte">Começa com P: Pneu X, Pastilha e Palheta.</p>
+    </div>
+  </div>
+  <table>
+    <tr><th>Padrão do LIKE</th><th>Encontra</th></tr>
+    <tr><td><code>'P%'</code></td><td>começa com P &nbsp;(<code>%</code> = qualquer sequência, inclusive vazia)</td></tr>
+    <tr><td><code>'%freio%'</code></td><td>contém "freio" em qualquer posição</td></tr>
+    <tr><td><code>'%.com.br'</code></td><td>termina com .com.br</td></tr>
+    <tr><td><code>'_ateria%'</code></td><td>um caractere qualquer, depois "ateria" &nbsp;(<code>_</code> = exatamente um)</td></tr>
+  </table>
+  <p class="fonte">Livro, cap. 11.3, p. 64–65 · <a href="https://dev.mysql.com/doc/refman/8.4/en/string-comparison-functions.html">MySQL: LIKE</a>. No nosso banco, comparações de texto não diferenciam maiúsculas de minúsculas: <code>'curitiba'</code> encontra <code>'Curitiba'</code>.</p>
+</section>
+
+<section class="slide" style="font-size:.96em">
+  <h2>IS NULL e ORDER BY</h2>
+  <div class="duas">
+    <div>
+      <p><strong>Quem está sem telefone ou sem e-mail?</strong></p>
+<pre><code class="sql">SELECT Nome, Telefone, Email
+FROM Clientes
+WHERE Telefone IS NULL
+   OR Email IS NULL;</code></pre>
+      <table>
+        <tr><th>Nome</th><th>Telefone</th><th>Email</th></tr>
+        <tr><td>Oficina Fernanda &amp; Filhos</td><td>43992224455</td><td class="nulo">NULL</td></tr>
+        <tr><td>Retífica Carmen</td><td class="nulo">NULL</td><td>carmen@retifica…</td></tr>
+      </table>
+    </div>
+    <div>
+      <p><strong>Vendas, da maior para a menor</strong></p>
+<pre><code class="sql">SELECT VendaID, DataVenda, TotalVenda
+FROM Vendas
+WHERE TotalVenda > 1000
+ORDER BY TotalVenda DESC;</code></pre>
+      <table>
+        <tr><th>VendaID</th><th>DataVenda</th><th class="num">TotalVenda</th></tr>
+        <tr><td>2</td><td>2024-03-11</td><td class="num">6100.50</td></tr>
+        <tr><td>4</td><td>2024-04-18</td><td class="num">5440.00</td></tr>
+        <tr><td>7</td><td>2024-06-03</td><td class="num">1783.70</td></tr>
+        <tr><td>1</td><td>2024-03-04</td><td class="num">1477.80</td></tr>
+      </table>
+    </div>
+  </div>
+  <ul>
+    <li><code>ASC</code> (crescente) é o padrão; <code>DESC</code> inverte. O contrário de <code>IS NULL</code> é <code>IS NOT NULL</code>.</li>
+    <li>Dá para ordenar por mais de uma coluna: <code>ORDER BY Estado, Cidade, Nome</code>.</li>
+    <li><strong>Sem <code>ORDER BY</code>, a ordem do resultado não é garantida.</strong></li>
+  </ul>
+  <p class="fonte">Livro, cap. 11.3, p. 68 · <a href="https://dev.mysql.com/doc/refman/8.4/en/working-with-null.html">MySQL: NULL</a></p>
+</section>
+
+<section class="slide" style="font-size:.96em">
+  <h2>DISTINCT e LIMIT</h2>
+  <div class="duas">
+    <div>
+      <p><strong>Em quais cidades temos clientes?</strong></p>
+<pre><code class="sql">SELECT DISTINCT Cidade
+FROM Clientes
+ORDER BY Cidade;</code></pre>
+      <table>
+        <tr><th>Cidade</th></tr>
+        <tr><td>Bauru</td></tr><tr><td>Curitiba</td></tr><tr><td>Joinville</td></tr><tr><td>Londrina</td></tr><tr><td>Maringá</td></tr>
+      </table>
+      <p><code>DISTINCT</code> elimina linhas repetidas do resultado. Sem ele, Curitiba apareceria duas vezes.</p>
+    </div>
+    <div>
+      <p><strong>Os 3 produtos mais caros</strong></p>
+<pre><code class="sql">SELECT Nome, Preco
+FROM Produtos
+ORDER BY Preco DESC
+LIMIT 3;</code></pre>
+      <table>
+        <tr><th>Nome</th><th class="num">Preco</th></tr>
+        <tr><td>Bateria 60Ah</td><td class="num">620.00</td></tr>
+        <tr><td>Correia de distribuição</td><td class="num">512.05</td></tr>
+        <tr><td>Amortecedor traseiro</td><td class="num">430.00</td></tr>
+      </table>
+      <p><code>LIMIT n</code> corta o resultado nas primeiras <em>n</em> linhas. Só faz sentido junto com <code>ORDER BY</code>.</p>
+    </div>
+  </div>
+  <p class="fonte"><code>DISTINCT</code> e <code>LIMIT</code> não estão no livro; entram aqui porque aparecem em quase toda consulta do dia a dia. <code>LIMIT</code> é sintaxe do MySQL.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Filtros combinados</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Em dupla: um digita, o outro confere. Troquem a cada questão.</p>
+  <ol>
+    <li>Produtos com estoque entre 100 e 500 unidades, do maior estoque para o menor.</li>
+    <li>Clientes cujo e-mail termina com <code>.com.br</code> e que <strong>não</strong> são do Paraná.</li>
+    <li>Vendas que não tiveram funcionário (vendas pelo site).</li>
+    <li>Funcionários contratados antes de 2021, do mais antigo para o mais novo.</li>
+    <li>Produtos que têm "freio" <strong>ou</strong> "óleo" no nome.</li>
+    <li>A venda de maior valor (só ela).</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 4 · 40 min</span>
+  <h2>UPDATE e DELETE</h2>
+  <p>Dois comandos que fazem exatamente o que você escreveu. Mesmo que não seja o que você queria.</p>
+</section>
+
+<section class="slide">
+  <h2>UPDATE: alterar linhas que já existem</h2>
+<pre><code class="sql">UPDATE Produtos
+SET Preco = 550.25
+WHERE ProdutoID = 1;</code></pre>
+  <div class="duas">
+    <div>
+      <p>Várias colunas de uma vez:</p>
+<pre><code class="sql">UPDATE Clientes
+SET Telefone = '4430251100',
+    Email = 'contato@retifica.com.br'
+WHERE ClienteID = 5;</code></pre>
+    </div>
+    <div>
+      <p>Usando o valor atual na conta (aumento de 10%):</p>
+<pre><code class="sql">UPDATE Funcionarios
+SET Salario = Salario * 1.10
+WHERE Cargo = 'Estagiária';</code></pre>
+    </div>
+  </div>
+  <div class="caixa aviso">
+    <span class="rotulo">O WHERE decide quem muda</span>
+    <code>UPDATE Produtos SET Preco = 550.25;</code> &nbsp;sem <code>WHERE</code> coloca o mesmo preço em <strong>todos</strong> os produtos. O SGBD não pergunta "tem certeza?".
+  </div>
+  <p class="fonte">Livro, cap. 11.2, p. 55 · <a href="https://dev.mysql.com/doc/refman/8.4/en/update.html">MySQL: UPDATE</a></p>
+  
+</section>
+
+<section class="slide">
+  <h2>DELETE: apagar linhas</h2>
+  <div class="duas">
+    <div>
+<pre><code class="sql">DELETE FROM Produtos
+WHERE ProdutoID = 8;</code></pre>
+      <p>Nenhuma tabela aponta para Produtos: o <code>DELETE</code> funciona.</p>
+<pre><code class="sql">DELETE FROM Clientes
+WHERE ClienteID = 1;</code></pre>
+<pre class="erro"><code>ERROR 1451: Cannot delete or update
+a parent row: a foreign key
+constraint fails (fk_vendas_cliente)</code></pre>
+      <p>A BS Serviços tem vendas. A FK protege o histórico.</p>
+    </div>
+    <div>
+      <div class="caixa aviso">
+        <span class="rotulo">Mesma regra do UPDATE</span>
+        <code>DELETE FROM Produtos;</code> &nbsp;sem <code>WHERE</code> apaga <strong>todas</strong> as linhas.
+      </div>
+      <div class="caixa certo">
+        <span class="rotulo">Hábito profissional</span>
+        <p>Antes de todo <code>UPDATE</code> ou <code>DELETE</code>, rode um <code>SELECT</code> com o <strong>mesmo <code>WHERE</code></strong>.</p>
+<pre style="margin:0"><code class="sql">SELECT * FROM Produtos WHERE ProdutoID = 8;
+-- é só essa linha mesmo? então:
+DELETE FROM Produtos WHERE ProdutoID = 8;</code></pre>
+      </div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.2, p. 55 · <a href="https://dev.mysql.com/doc/refman/8.4/en/delete.html">MySQL: DELETE</a></p>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Manutenção na AutoNex</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Para cada item: primeiro o <code>SELECT</code> de conferência, depois o comando.</p>
+  <ol>
+    <li>O Filtro de óleo passou a custar R$ 42,50.</li>
+    <li>A Oficina Fernanda &amp; Filhos informou o e-mail <code>contato@fernandaefilhos.com.br</code>.</li>
+    <li>Chegaram 30 amortecedores traseiros: some ao estoque atual.</li>
+    <li>O Centro Automotivo Joinville pediu para sair do cadastro. Dá para apagar? Por quê?</li>
+    <li>O funcionário Joaquim Silveira saiu da empresa. Dá para apagar? O que você faria?</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Desafio: o relatório do gerente</h2>
+  <p><span class="timer" data-min="20"></span> &nbsp;Antes, <strong>apague do editor</strong> os <code>UPDATE</code> e <code>DELETE</code> da manutenção: com o <code>autonex.sql</code> no topo, o Run volta aos dados originais. Depois responda cada pedido com <strong>uma</strong> consulta.</p>
+  <ol>
+    <li>"Quais produtos preciso repor?" — nome e estoque dos produtos com menos de 50 unidades, do menor estoque para o maior.</li>
+    <li>"Quanto dinheiro tenho parado?" — nome e valor em estoque (preço × estoque) dos 3 produtos com maior valor parado.</li>
+    <li>"Quem são meus vendedores?" — nome e salário de quem tem cargo começando com "Vend", do maior salário para o menor.</li>
+    <li>"Quais vendas do segundo trimestre de 2024 passaram de R$ 700,00?" — número, data e total, em ordem de data.</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide">
+  <h2>Revisão relâmpago</h2>
+  <div class="quiz">
+    <p class="pergunta">1. O que faz <code>DELETE FROM Vendas;</code> ?</p>
+    <ol>
+      <li>Apaga a tabela Vendas do banco</li>
+      <li data-certa>Apaga todas as linhas de Vendas</li>
+      <li>Apaga somente a última linha inserida</li>
+    </ol>
+    <div class="explica">Sem WHERE, vale para todas as linhas. A tabela continua existindo, vazia.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. Qual padrão encontra nomes que <strong>contêm</strong> "auto"?</p>
+    <ol>
+      <li><code>LIKE 'auto%'</code></li>
+      <li data-certa><code>LIKE '%auto%'</code></li>
+      <li><code>LIKE '_auto_'</code></li>
+    </ol>
+    <div class="explica">% dos dois lados: qualquer coisa antes e depois.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. Qual cláusula garante a ordem das linhas no resultado?</p>
+    <ol>
+      <li><code>WHERE</code></li>
+      <li><code>DISTINCT</code></li>
+      <li data-certa><code>ORDER BY</code></li>
+    </ol>
+    <div class="explica">Sem ORDER BY, o SGBD devolve na ordem que quiser.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Para casa e para a próxima aula</h2>
+  <div class="duas">
+    <div>
+      <div class="caixa certo">
+        <span class="rotulo">Hoje você conseguiu</span>
+        Popular um banco respeitando as FKs, responder perguntas com filtros e ordenação, e alterar e apagar dados com segurança.
+      </div>
+      <p><strong>Lista 5:</strong> <a href="../listas/lista-05.html">listas/lista-05.html</a> — dados e consultas na BiblioTech.</p>
+      <p><strong>Leitura:</strong> livro, 11.2 e 11.3 (p. 54–58, 64–68).</p>
+      <p><strong>Consulta rápida:</strong> <a href="../reference/cola-sql.html">cola de SQL</a> · prática extra: <a href="https://sqlbolt.com/">SQLBolt</a> (em inglês)</p>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Próxima aula</span>
+        Hoje toda consulta olhou para <strong>uma</strong> tabela. Mas "qual vendedor atendeu qual cliente?" está espalhado em três. Na aula 6: <code>JOIN</code>.
+        <br>Aula 6 → · <a href="0004-ddl-criando-o-banco.html">← Aula 4</a>
+      </div>
+      <p class="fonte">Dúvidas sobre o material? Pergunte ao professor.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>

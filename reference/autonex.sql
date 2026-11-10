@@ -1,13 +1,10 @@
 -- =====================================================================
 -- AutoNex — banco de exemplo do curso (UC4 Banco de Dados)
--- Mesmo cenário do livro (indústria automotiva), com os dados de aula.
--- Alvo: MariaDB 10.4 (XAMPP) via phpMyAdmin. Aba "SQL" > colar > Executar.
--- Rodar este script inteiro RECRIA o banco do zero (apaga o que existir).
+-- Estrutura da aula 4 (4 tabelas) + os dados usados nas aulas 5 e 6.
+-- Para o MySQL de onecompiler.com/mysql: cole tudo no editor e clique Run.
+-- Cada Run recria tudo do zero: este script é o "botão de reset".
+-- Escreva suas consultas logo abaixo da última linha.
 -- =====================================================================
-
-DROP DATABASE IF EXISTS AutoNex;
-CREATE DATABASE AutoNex CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-USE AutoNex;
 
 -- ---------- Estrutura (DDL) ----------
 
@@ -53,18 +50,6 @@ CREATE TABLE Vendas (
         FOREIGN KEY (FuncionarioID) REFERENCES Funcionarios(FuncionarioID)
 );
 
-CREATE TABLE ItensVenda (
-    ItemVendaID   INT AUTO_INCREMENT PRIMARY KEY,
-    VendaID       INT           NOT NULL,
-    ProdutoID     INT           NOT NULL,
-    Quantidade    INT           NOT NULL,
-    PrecoUnitario DECIMAL(10,2) NOT NULL,
-    CONSTRAINT fk_itens_venda
-        FOREIGN KEY (VendaID) REFERENCES Vendas(VendaID),
-    CONSTRAINT fk_itens_produto
-        FOREIGN KEY (ProdutoID) REFERENCES Produtos(ProdutoID)
-);
-
 -- ---------- Dados (DML) ----------
 
 INSERT INTO Clientes (Nome, CNPJ, Endereco, Cidade, Estado, CEP, Telefone, Email) VALUES
@@ -101,18 +86,3 @@ INSERT INTO Vendas (ClienteID, FuncionarioID, DataVenda, TotalVenda) VALUES
 (1, NULL, '2024-05-21',  700.00),
 (5, 2,    '2024-06-03', 1783.70),
 (3, 1,    '2024-06-17',  620.00);
-
-INSERT INTO ItensVenda (VendaID, ProdutoID, Quantidade, PrecoUnitario) VALUES
-(1, 2,  4, 350.00),
-(1, 3,  2,  38.90),
-(2, 1, 10, 512.05),
-(2, 7, 40,  24.50),
-(3, 4,  2, 189.90),
-(4, 5,  6, 620.00),
-(4, 6,  4, 430.00),
-(5, 3, 10,  38.90),
-(5, 7, 16,  24.50),
-(6, 2,  2, 350.00),
-(7, 1,  2, 512.05),
-(7, 4,  4, 189.90),
-(8, 5,  1, 620.00);

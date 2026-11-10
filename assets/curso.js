@@ -12,6 +12,8 @@
                            <div class="explica">…</div></div>
    • Cronômetro          <span class="timer" data-min="10"></span>
    • Realce de SQL       <pre><code class="sql">…</code></pre>
+   • Script para copiar  <pre class="copiar"><code class="sql">…</code></pre>
+       ganha um botão "Copiar" (texto puro, pronto para colar no editor online)
    ===================================================================== */
 (function () {
   'use strict';
@@ -49,6 +51,26 @@
     btn.addEventListener('click', function () {
       div.hidden = !div.hidden;
       btn.textContent = div.hidden ? rotulo : 'Ocultar';
+    });
+  }
+
+  /* ---------- Script para copiar ---------- */
+  function prepararCopiar(pre) {
+    var btn = document.createElement('button');
+    btn.className = 'btn';
+    btn.textContent = 'Copiar';
+    pre.parentNode.insertBefore(btn, pre);
+    btn.addEventListener('click', function () {
+      var texto = pre.textContent;
+      function ok() { btn.textContent = 'Copiado ✓'; setTimeout(function () { btn.textContent = 'Copiar'; }, 2000); }
+      function manual() {
+        var sel = window.getSelection(), faixa = document.createRange();
+        faixa.selectNodeContents(pre); sel.removeAllRanges(); sel.addRange(faixa);
+        try { if (document.execCommand('copy')) { ok(); return; } } catch (e) { /* segue */ }
+        btn.textContent = 'Selecionado: use Ctrl+C';
+      }
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(texto).then(ok, manual);
+      else manual();
     });
   }
 
@@ -178,6 +200,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('code.sql'), realcar);
     Array.prototype.forEach.call(document.querySelectorAll('.resposta'), prepararResposta);
     Array.prototype.forEach.call(document.querySelectorAll('.quiz'), prepararQuiz);
+    Array.prototype.forEach.call(document.querySelectorAll('pre.copiar'), prepararCopiar);
     Array.prototype.forEach.call(document.querySelectorAll('.timer'), prepararTimer);
     if (document.body.classList.contains('deck')) prepararDeck();
     if (/[?&]medir\b/.test(location.search)) medir();

@@ -156,7 +156,25 @@
       </ul>
     </div>
   </div>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">CREATE TABLE Funcionarios (
+    FuncionarioID   INT AUTO_INCREMENT PRIMARY KEY,
+    Nome            VARCHAR(100)  NOT NULL,
+    Cargo           VARCHAR(50)   NOT NULL,
+    Salario         DECIMAL(10,2) NOT NULL,
+    DataContratacao DATE          NOT NULL,
+    Telefone        VARCHAR(20),
+    Email           VARCHAR(100)
+);
+
+CREATE TABLE Produtos (
+    ProdutoID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100)  NOT NULL,
+    Descricao TEXT,
+    Preco     DECIMAL(10,2) NOT NULL,
+    Estoque   INT           NOT NULL DEFAULT 0
+);</code></pre>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -228,7 +246,25 @@
       <li>No fim, acrescente <code>SHOW TABLES;</code> e confira se aparecem as duas.</li>
     </ul>
   </div>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">CREATE TABLE Turmas (
+    TurmaID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome    VARCHAR(20) NOT NULL,
+    Turno   VARCHAR(10)
+);
+
+CREATE TABLE Alunos (
+    AlunoID   INT AUTO_INCREMENT PRIMARY KEY,
+    TurmaID   INT          NOT NULL,
+    Nome      VARCHAR(100) NOT NULL,
+    Matricula CHAR(6)      NOT NULL UNIQUE,
+    CONSTRAINT fk_alunos_turma
+        FOREIGN KEY (TurmaID) REFERENCES Turmas(TurmaID)
+);
+
+SHOW TABLES;</code></pre>
+    <p>A FK fica em Alunos, o lado N. Turmas vem primeiro, porque Alunos depende dela.</p>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -296,7 +332,14 @@ DROP TABLE IF EXISTS Clientes;</code></pre>
     <li>"Esquece o peso, não vamos usar."</li>
   </ol>
   <p>Acrescente um por vez no script, com <code>DESCRIBE Produtos;</code> depois de cada um, e confira.</p>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">ALTER TABLE Produtos ADD PesoKg DECIMAL(8,3);
+
+ALTER TABLE Produtos MODIFY Nome VARCHAR(150) NOT NULL;
+
+ALTER TABLE Produtos DROP COLUMN PesoKg;</code></pre>
+    <p>No 2, se esquecer o <code>NOT NULL</code>, a coluna volta a aceitar NULL: o <code>MODIFY</code> redefine a coluna inteira.</p>
+  </div>
 </section>
 
 <section class="slide">
@@ -315,7 +358,12 @@ INSERT INTO Clientes (CNPJ) VALUES ('11222000133');
 -- 4. Venda para um cliente que não existe
 INSERT INTO Vendas (ClienteID, DataVenda, TotalVenda)
 VALUES (99, '2024-07-01', 100.00);</code></pre>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+    <p><strong>1</strong> funciona; o <code>ClienteID</code> 1 foi gerado pelo <code>AUTO_INCREMENT</code>.<br>
+    <strong>2</strong> recusado pelo <code>UNIQUE</code> (entrada duplicada para a chave <code>clientes.CNPJ</code>).<br>
+    <strong>3</strong> recusado pelo <code>NOT NULL</code> (o campo <code>Nome</code> não tem valor padrão).<br>
+    <strong>4</strong> recusado pela <code>FOREIGN KEY</code> (<code>fk_vendas_cliente</code>): não existe cliente 99.</p>
+  </div>
   
 </section>
 
@@ -386,7 +434,7 @@ VALUES (99, '2024-07-01', 100.00);</code></pre>
       <div class="caixa ideia">
         <span class="rotulo">Próxima aula</span>
         As tabelas estão vazias. Na aula 5 vamos <strong>encher, corrigir, apagar e consultar</strong>: <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code> e <code>SELECT</code> com filtros.
-        <br>Aula 5 → · <a href="0003-chaves-e-tabelas.html">← Aula 3</a>
+        <br><a href="0005-dml-e-select.html">Aula 5 →</a> · <a href="0003-chaves-e-tabelas.html">← Aula 3</a>
       </div>
       <p class="fonte">Salve o script da AutoNex em um arquivo <code>.sql</code> antes de sair. Dúvidas sobre o material? Pergunte ao professor.</p>
     </div>

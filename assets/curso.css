@@ -92,6 +92,9 @@ span.fonte { display: inline-block; }
 button { font: inherit; cursor: pointer; }
 .btn { border: 1px solid var(--azul); background: #fff; color: var(--azul); border-radius: .3em; padding: .25em .8em; font-weight: 600; font-size: .8em; }
 .btn:hover { background: var(--azul-claro); }
+pre.copiar { max-height: 22em; overflow-y: auto; margin-top: .4em; }
+.duas > *, .tres > * { min-width: 0; }
+body.deck pre.copiar { max-height: 48vh; font-size: .8em; }
 .resposta[hidden] { display: none; }
 .resposta { border-left: .25em solid var(--verde); padding-left: .8em; margin-top: .5em; }
 
@@ -198,5 +201,6 @@ body.doc dl.glossario dd { margin: .1em 0 0; }
   body.deck .resposta[hidden] { display: block; }
   .rodape, .progresso, .btn, .timer, .nao-imprime { display: none !important; }
   body.doc { font-size: 11pt; padding: 0; max-width: none; }
+  pre.copiar { max-height: none; overflow: visible; }
   a { color: inherit; text-decoration: none; }
 }
