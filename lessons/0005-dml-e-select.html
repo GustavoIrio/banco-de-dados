@@ -156,7 +156,14 @@ VALUES ('Correia de distribuição',
   <p><span class="timer" data-min="12"></span> &nbsp;A Agata Silva (vendedora, R$ 3.200,00, contratada em 15/01/2020) vendeu hoje para a BS Serviços <strong>4 correias de distribuição</strong> a R$ 512,05 cada.</p>
   <p>Escreva os <code>INSERT</code> necessários, na ordem certa. Você já tem o cliente (ID 1) dos slides anteriores.</p>
   <p>Dica: depois de cada <code>INSERT</code>, faça <code>SELECT * FROM tabela;</code> para descobrir o ID gerado.</p>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">INSERT INTO Funcionarios (Nome, Cargo, Salario, DataContratacao)
+VALUES ('Agata Silva', 'Vendedora', 3200.00, '2020-01-15');
+
+INSERT INTO Vendas (ClienteID, FuncionarioID, DataVenda, TotalVenda)
+VALUES (1, 1, '2024-07-01', 2048.20);</code></pre>
+    <p>Primeiro a funcionária, depois a venda, que aponta para ela e para o cliente. O total (4 × 512,05 = 2048,20) foi calculado por nós: a AutoNex da aula 4 guarda só o total da venda, não quais produtos saíram.</p>
+  </div>
   
 </section>
 
@@ -366,7 +373,13 @@ WHERE Estoque > 0 AND Estoque <= 100;</code></pre>
     <li>Nome dos produtos que custam menos de R$ 100,00 <strong>ou</strong> estão sem estoque.</li>
     <li>Nome do funcionário e o salário anual (12 × salário), com o nome <code>SalarioAnual</code>.</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">SELECT Nome, Salario FROM Funcionarios WHERE Salario > 3000;           -- 3 linhas
+SELECT * FROM Vendas WHERE DataVenda >= '2024-05-01';                  -- 4 linhas
+SELECT Nome, Email FROM Clientes WHERE Cidade = 'Curitiba';            -- 2 linhas
+SELECT Nome FROM Produtos WHERE Preco < 100 OR Estoque = 0;            -- 3 linhas
+SELECT Nome, Salario * 12 AS SalarioAnual FROM Funcionarios;           -- 5 linhas</code></pre>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -495,7 +508,23 @@ LIMIT 3;</code></pre>
     <li>Produtos que têm "freio" <strong>ou</strong> "óleo" no nome.</li>
     <li>A venda de maior valor (só ela).</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">SELECT Nome, Estoque FROM Produtos
+WHERE Estoque BETWEEN 100 AND 500 ORDER BY Estoque DESC;        -- 4 linhas
+
+SELECT Nome, Email FROM Clientes
+WHERE Email LIKE '%.com.br' AND Estado <> 'PR';                 -- 2 linhas
+
+SELECT * FROM Vendas WHERE FuncionarioID IS NULL;               -- 1 linha (venda 6)
+
+SELECT Nome, DataContratacao FROM Funcionarios
+WHERE DataContratacao < '2021-01-01' ORDER BY DataContratacao;  -- Ruan, Agata
+
+SELECT Nome FROM Produtos
+WHERE Nome LIKE '%freio%' OR Nome LIKE '%óleo%';                -- 2 linhas
+
+SELECT * FROM Vendas ORDER BY TotalVenda DESC LIMIT 1;          -- venda 2</code></pre>
+  </div>
 </section>
 
 <section class="slide secao">
@@ -574,7 +603,18 @@ DELETE FROM Produtos WHERE ProdutoID = 8;</code></pre>
     <li>O Centro Automotivo Joinville pediu para sair do cadastro. Dá para apagar? Por quê?</li>
     <li>O funcionário Joaquim Silveira saiu da empresa. Dá para apagar? O que você faria?</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">UPDATE Produtos SET Preco = 42.50 WHERE ProdutoID = 3;
+
+UPDATE Clientes SET Email = 'contato@fernandaefilhos.com.br' WHERE ClienteID = 4;
+
+UPDATE Produtos SET Estoque = Estoque + 30 WHERE ProdutoID = 6;   -- vai de 12 para 42
+
+DELETE FROM Clientes WHERE ClienteID = 6;   -- funciona: nenhuma venda aponta para ele
+
+DELETE FROM Funcionarios WHERE FuncionarioID = 2;   -- recusado: ele tem 2 vendas</code></pre>
+    <p>No item 5 não se apaga: o histórico de vendas depende dele. Solução comum: uma coluna <code>Ativo</code> ou <code>DataDesligamento</code> em Funcionarios.</p>
+  </div>
 </section>
 
 <section class="slide exercicio">
@@ -586,7 +626,23 @@ DELETE FROM Produtos WHERE ProdutoID = 8;</code></pre>
     <li>"Quem são meus vendedores?" — nome e salário de quem tem cargo começando com "Vend", do maior salário para o menor.</li>
     <li>"Quais vendas do segundo trimestre de 2024 passaram de R$ 700,00?" — número, data e total, em ordem de data.</li>
   </ol>
-  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  <div class="resposta">
+<pre><code class="sql">SELECT Nome, Estoque FROM Produtos WHERE Estoque < 50 ORDER BY Estoque;
+-- Palheta 0, Amortecedor 12, Bateria 40
+
+SELECT Nome, Preco * Estoque AS ValorParado FROM Produtos
+ORDER BY ValorParado DESC LIMIT 3;
+-- Correia 102410.00, Pneu X 35000.00, Pastilha 28485.00
+
+SELECT Nome, Salario FROM Funcionarios
+WHERE Cargo LIKE 'Vend%' ORDER BY Salario DESC;
+-- Agata 3200, Carmen 3100, Joaquim 2900
+
+SELECT VendaID, DataVenda, TotalVenda FROM Vendas
+WHERE DataVenda BETWEEN '2024-04-01' AND '2024-06-30' AND TotalVenda > 700
+ORDER BY DataVenda;
+-- vendas 4, 5 e 7</code></pre>
+  </div>
 </section>
 
 <section class="slide">
@@ -636,7 +692,7 @@ DELETE FROM Produtos WHERE ProdutoID = 8;</code></pre>
       <div class="caixa ideia">
         <span class="rotulo">Próxima aula</span>
         Hoje toda consulta olhou para <strong>uma</strong> tabela. Mas "qual vendedor atendeu qual cliente?" está espalhado em três. Na aula 6: <code>JOIN</code>.
-        <br>Aula 6 → · <a href="0004-ddl-criando-o-banco.html">← Aula 4</a>
+        <br><a href="0006-join.html">Aula 6 →</a> · <a href="0004-ddl-criando-o-banco.html">← Aula 4</a>
       </div>
       <p class="fonte">Dúvidas sobre o material? Pergunte ao professor.</p>
     </div>

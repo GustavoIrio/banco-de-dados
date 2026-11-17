@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lista 6 — JOIN na BiblioTech</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="doc largo">
+<nav class="trilha nao-imprime"><a href="../index.html">Curso</a> · <a href="../lessons/0006-join.html">Aula 6</a> · <a href="../reference/cola-sql.html">Cola de SQL</a></nav>
+<header class="topo">
+  <span class="rotulo">UC4 · Banco de Dados · Lista 6</span>
+  <h1>JOIN na BiblioTech</h1>
+  <p class="sub"><code>INNER JOIN</code>, <code>LEFT JOIN</code>, <code>CASE</code> e subconsulta</p>
+  <p>Nome: ______________________________ &nbsp; Turma: ________ &nbsp; Data: ___/___/_____</p>
+</header>
+
+<p class="nao-imprime caixa">Prefere responder no computador? <a href="lista-06.docx">Baixe a versão editável (Word)</a>, responda no próprio arquivo e entregue como o professor pedir.</p>
+
+<h2>Ponto de partida: a BiblioTech completa</h2>
+<p>Abra <strong>onecompiler.com/mysql</strong>, apague o exemplo, clique em <strong>Copiar</strong> e cole o script abaixo no editor. Ele cria as quatro tabelas da lista 4 e insere os dados da lista 5. Deixe-o sempre no topo e escreva só a consulta da questão embaixo: cada Run recria tudo e roda de novo.</p>
+<pre class="copiar" data-arquivo="biblioteca.sql"><code class="sql">-- =====================================================================
+-- BiblioTech — banco das listas de exercícios (biblioteca escolar)
+-- Estrutura da lista 4 (4 tabelas, só 1:N) + os dados da lista 5.
+-- Ponto de partida da lista 6 em diante (e gabarito das listas 4 e 5).
+-- Para o MySQL de onecompiler.com/mysql: cole tudo no editor e clique Run.
+-- Cada Run recria tudo do zero: deixe este script no topo do editor e
+-- escreva as suas consultas logo abaixo da última linha.
+-- Cada livro tem um autor (Livros.AutorID). "Sistemas de Banco de Dados"
+-- tem dois autores no mundo real; aqui fica só com Elmasri.
+-- =====================================================================
+
+CREATE TABLE Alunos (
+    AlunoID   INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100) NOT NULL,
+    Matricula CHAR(6)      NOT NULL UNIQUE,
+    Turma     VARCHAR(10)  NOT NULL,
+    Email     VARCHAR(100)
+);
+CREATE TABLE Autores (
+    AutorID       INT AUTO_INCREMENT PRIMARY KEY,
+    Nome          VARCHAR(100) NOT NULL,
+    Nacionalidade VARCHAR(50)
+);
+CREATE TABLE Livros (
+    LivroID       INT AUTO_INCREMENT PRIMARY KEY,
+    AutorID       INT          NOT NULL,
+    Titulo        VARCHAR(150) NOT NULL,
+    ISBN          CHAR(13)     NOT NULL UNIQUE,
+    AnoPublicacao INT,
+    Exemplares    INT          NOT NULL DEFAULT 1,
+    CONSTRAINT fk_livros_autor FOREIGN KEY (AutorID) REFERENCES Autores(AutorID)
+);
+
+CREATE TABLE Emprestimos (
+    EmprestimoID   INT AUTO_INCREMENT PRIMARY KEY,
+    AlunoID        INT  NOT NULL,
+    LivroID        INT  NOT NULL,
+    DataEmprestimo DATE NOT NULL,
+    DataDevolucao  DATE NULL,
+    CONSTRAINT fk_emp_aluno FOREIGN KEY (AlunoID) REFERENCES Alunos(AlunoID),
+    CONSTRAINT fk_emp_livro FOREIGN KEY (LivroID) REFERENCES Livros(LivroID)
+);
+
+INSERT INTO Alunos (Nome, Matricula, Turma, Email) VALUES
+('Bruno Almeida',   '240001', 'DS-1A', 'bruno@escola.com.br'),
+('Camila Rocha',    '240002', 'DS-1A', 'camila@escola.com.br'),
+('Diego Martins',   '240003', 'DS-1B', NULL),
+('Elisa Nogueira',  '240004', 'DS-1B', 'elisa@escola.com.br'),
+('Felipe Tanaka',   '240005', 'DS-2A', 'felipe@escola.com.br'),
+('Gabriela Souza',  '240006', 'DS-2A', NULL);
+
+INSERT INTO Autores (Nome, Nacionalidade) VALUES
+('Ramez Elmasri',       'Egípcia'),
+('Shamkant Navathe',    'Indiana'),
+('Machado de Assis',    'Brasileira'),
+('Clarice Lispector',   'Brasileira'),
+('Robert C. Martin',    'Americana'),
+('Carlos Alberto Heuser','Brasileira'),
+('Graciliano Ramos',     'Brasileira');
+
+INSERT INTO Livros (AutorID, Titulo, ISBN, AnoPublicacao, Exemplares) VALUES
+(1, 'Sistemas de Banco de Dados', '9788579360855', 2011, 3),
+(3, 'Dom Casmurro',               '9788535910663', 1899, 5),
+(4, 'A Hora da Estrela',          '9788532508126', 1977, 2),
+(5, 'Código Limpo',               '9788576082675', 2009, 1),
+(6, 'Projeto de Banco de Dados',  '9788577803828', 2009, 2),
+(3, 'Memórias Póstumas de Brás Cubas', '9788535911664', 1881, 4),
+(7, 'Vidas Secas',                 '9788501114785', 1938, 3);
+
+INSERT INTO Emprestimos (AlunoID, LivroID, DataEmprestimo, DataDevolucao) VALUES
+(1, 1, '2024-03-05', '2024-03-19'),
+(1, 4, '2024-03-20', NULL),
+(2, 2, '2024-03-06', '2024-03-13'),
+(2, 3, '2024-04-01', '2024-04-10'),
+(3, 1, '2024-04-02', NULL),
+(4, 5, '2024-04-15', '2024-04-29'),
+(4, 2, '2024-05-02', NULL),
+(2, 6, '2024-05-10', '2024-05-20'),
+(5, 1, '2024-05-12', '2024-05-26');</code></pre>
+<p class="fonte">Arquivo: <a href="../reference/biblioteca.sql">biblioteca.sql</a></p>
+
+<div class="der" style="font-size:.8em;gap:.8em;align-items:flex-start;flex-wrap:wrap">
+  <div class="tabela-der"><h4>Alunos</h4><ul><li class="pk">AlunoID</li><li class="col">Nome</li><li class="col">Matricula</li><li class="col">Turma</li><li class="col">Email</li></ul></div>
+  <div class="tabela-der"><h4>Emprestimos</h4><ul><li class="pk">EmprestimoID</li><li class="fk">AlunoID</li><li class="fk">LivroID</li><li class="col">DataEmprestimo</li><li class="col">DataDevolucao</li></ul></div>
+  <div class="tabela-der"><h4>Livros</h4><ul><li class="pk">LivroID</li><li class="fk">AutorID</li><li class="col">Titulo</li><li class="col">ISBN</li><li class="col">AnoPublicacao</li><li class="col">Exemplares</li></ul></div>
+  <div class="tabela-der"><h4>Autores</h4><ul><li class="pk">AutorID</li><li class="col">Nome</li><li class="col">Nacionalidade</li></ul></div>
+</div>
+
+<h2>Parte A — INNER JOIN</h2>
+<ol class="questoes">
+  <li>Liste todos os empréstimos com o <strong>nome do aluno</strong> e o <strong>título do livro</strong>, em ordem de data. Quantas tabelas entram no <code>FROM</code>? <span class="nivel">básico</span>
+    
+  </li>
+  <li>Liste cada livro com o <strong>nome do autor</strong>, em ordem de título. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Quais livros do acervo são de <strong>Machado de Assis</strong>? Mostre título e ano. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Quais alunos já pegaram emprestado algum livro de <strong>Machado de Assis</strong>? Sem repetir nomes. Antes de escrever, trace o caminho entre Alunos e Autores no esquema. <span class="nivel">desafio</span>
+    
+  </li>
+  <li>Títulos diferentes já emprestados para alunos da turma <strong>DS-1A</strong>, em ordem alfabética. <span class="nivel">intermediário</span>
+    
+  </li>
+</ol>
+
+<h2>Parte B — LEFT JOIN</h2>
+<ol class="questoes" style="counter-reset: q 5">
+  <li>Liste <strong>todos</strong> os alunos e a data de cada empréstimo que fizeram. Quem nunca pegou livro deve aparecer também. <span class="nivel">básico</span>
+    
+  </li>
+  <li>Quais alunos <strong>nunca</strong> pegaram um livro? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Quais livros <strong>nunca</strong> foram emprestados? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Quais autores cadastrados <strong>não têm nenhum livro</strong> no acervo? <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Um colega escreveu a consulta abaixo para a questão 7 e ela não devolveu nenhuma linha. Explique o erro. <span class="nivel">desafio</span>
+<pre><code class="sql">SELECT A.Nome
+FROM Alunos A
+INNER JOIN Emprestimos E ON E.AlunoID = A.AlunoID
+WHERE E.EmprestimoID IS NULL;</code></pre>
+    
+  </li>
+</ol>
+
+<h2>Parte C — CASE e combinações</h2>
+<ol class="questoes" style="counter-reset: q 10">
+  <li>Liste os empréstimos <strong>em aberto</strong> com o nome do aluno, o título do livro e a data do empréstimo. <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Para os empréstimos da aluna <strong>Elisa Nogueira</strong>, mostre o título e uma coluna <code>Situacao</code> com <code>'Em aberto'</code> ou <code>'Devolvido'</code>. <span class="nivel">intermediário</span>
+    
+  </li>
+  <li>Usando <strong>subconsulta</strong> com <code>IN</code>: nome dos alunos que têm pelo menos um empréstimo em aberto. <span class="nivel">desafio</span>
+    
+  </li>
+</ol>
+</body>
+</html>

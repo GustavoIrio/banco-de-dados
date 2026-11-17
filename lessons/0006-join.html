@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aula 6 — JOIN: consultando várias tabelas</title>
+<link rel="stylesheet" href="../assets/curso.css">
+<script src="../assets/curso.js" defer></script>
+</head>
+<body class="deck">
+
+<section class="slide capa">
+  <span class="rotulo">UC4 · Banco de Dados · Aula 6 de 7</span>
+  <h1>JOIN: consultando várias tabelas</h1>
+  <p class="sub">Separamos os dados em tabelas. Agora aprendemos a juntar de volta, na hora da consulta</p>
+  <p class="meta">Hoje você sai com: um relatório de vendas com o nome do cliente e do funcionário lado a lado, e a lista de quem <em>nunca</em> comprou.<br>
+  Livro: capítulo 11.3 (p. 56–67)</p>
+  
+</section>
+
+<section class="slide">
+  <h2>Seu ponto de partida: a AutoNex completa</h2>
+  <div class="duas">
+    <div>
+      <ol>
+        <li>Abra <strong>onecompiler.com/mysql</strong> e apague o exemplo.</li>
+        <li>Clique em <strong>Copiar</strong> e cole o script no editor.</li>
+        <li>Embaixo, escreva <code>SELECT * FROM Vendas;</code> e clique em <strong>Run</strong>: devem vir 8 linhas.</li>
+        <li>Nos exercícios, o script fica <strong>sempre no topo</strong>: troque só a consulta de baixo.</li>
+      </ol>
+      <table>
+        <tr><th>Tabela</th><th class="num">Linhas</th></tr>
+        <tr><td>Clientes</td><td class="num">6</td></tr>
+        <tr><td>Funcionarios</td><td class="num">5</td></tr>
+        <tr><td>Produtos</td><td class="num">8</td></tr>
+        <tr><td>Vendas</td><td class="num">8</td></tr>
+      </table>
+      <p class="fonte">Arquivo: <a href="../reference/autonex.sql">autonex.sql</a></p>
+    </div>
+    <div>
+      <pre class="copiar" data-arquivo="autonex.sql"><code class="sql">-- =====================================================================
+-- AutoNex — banco de exemplo do curso (UC4 Banco de Dados)
+-- Estrutura da aula 4 (4 tabelas) + os dados usados nas aulas 5 e 6.
+-- Para o MySQL de onecompiler.com/mysql: cole tudo no editor e clique Run.
+-- Cada Run recria tudo do zero: este script é o "botão de reset".
+-- Escreva suas consultas logo abaixo da última linha.
+-- =====================================================================
+
+-- ---------- Estrutura (DDL) ----------
+
+CREATE TABLE Clientes (
+    ClienteID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100) NOT NULL,
+    CNPJ      CHAR(14)     NOT NULL UNIQUE,
+    Endereco  VARCHAR(255),
+    Cidade    VARCHAR(100),
+    Estado    CHAR(2),
+    CEP       CHAR(8),
+    Telefone  VARCHAR(20),
+    Email     VARCHAR(100)
+);
+
+CREATE TABLE Funcionarios (
+    FuncionarioID   INT AUTO_INCREMENT PRIMARY KEY,
+    Nome            VARCHAR(100)  NOT NULL,
+    Cargo           VARCHAR(50)   NOT NULL,
+    Salario         DECIMAL(10,2) NOT NULL,
+    DataContratacao DATE          NOT NULL,
+    Telefone        VARCHAR(20),
+    Email           VARCHAR(100)
+);
+
+CREATE TABLE Produtos (
+    ProdutoID INT AUTO_INCREMENT PRIMARY KEY,
+    Nome      VARCHAR(100)  NOT NULL,
+    Descricao TEXT,
+    Preco     DECIMAL(10,2) NOT NULL,
+    Estoque   INT           NOT NULL DEFAULT 0
+);
+
+CREATE TABLE Vendas (
+    VendaID       INT AUTO_INCREMENT PRIMARY KEY,
+    ClienteID     INT           NOT NULL,
+    FuncionarioID INT           NULL,       -- NULL = venda feita pelo site
+    DataVenda     DATE          NOT NULL,
+    TotalVenda    DECIMAL(10,2) NOT NULL,
+    CONSTRAINT fk_vendas_cliente
+        FOREIGN KEY (ClienteID) REFERENCES Clientes(ClienteID),
+    CONSTRAINT fk_vendas_funcionario
+        FOREIGN KEY (FuncionarioID) REFERENCES Funcionarios(FuncionarioID)
+);
+
+-- ---------- Dados (DML) ----------
+
+INSERT INTO Clientes (Nome, CNPJ, Endereco, Cidade, Estado, CEP, Telefone, Email) VALUES
+('BS Serviços Automotivos ME',  '48996633000128', 'Rua Doze, 196',           'Bauru',     'SP', '17035640', '1435192270',  'contato@bsmec.com.br'),
+('Auto Peças Curitiba Ltda',    '11222000133',    'Av. das Torres, 1500',    'Curitiba',  'PR', '80666070', '4133221100',  'vendas@apcuritiba.com.br'),
+('Mecânica do Ademar',          '22333000144',    'Rua XV de Novembro, 45',  'Curitiba',  'PR', '80777080', '41991112233', 'ademar@mecanica.com.br'),
+('Oficina Fernanda &amp; Filhos',   '33444000155',    'Rua das Flores, 820',     'Londrina',  'PR', '86010000', '43992224455', NULL),
+('Retífica Carmen',             '44555000166',    'Av. Brasil, 3010',        'Maringá',   'PR', '87013000', NULL,          'carmen@retifica.com.br'),
+('Centro Automotivo Joinville', '55666000177',    'Rua do Príncipe, 12',     'Joinville', 'SC', '89201000', '4734556677',  'contato@cajoinville.com.br');
+
+INSERT INTO Funcionarios (Nome, Cargo, Salario, DataContratacao, Telefone, Email) VALUES
+('Agata Silva',       'Vendedora',         3200.00, '2020-01-15', '41988880001', 'agata@autonex.com.br'),
+('Joaquim Silveira',  'Vendedor',          2900.00, '2021-06-01', '41988880002', 'joaquim@autonex.com.br'),
+('Ruan Carlos Costa', 'Gerente de Vendas', 6500.00, '2018-03-12', '41988880003', 'ruan@autonex.com.br'),
+('Carmen Moura',      'Vendedora',         3100.00, '2022-09-05', '41988880004', 'carmen@autonex.com.br'),
+('Fernanda Lemes',    'Estagiária',        1400.00, '2024-02-19', NULL,          'fernanda@autonex.com.br');
+
+INSERT INTO Produtos (Nome, Descricao, Preco, Estoque) VALUES
+('Correia de distribuição',      'Correia dentada que sincroniza o motor',   512.05, 200),
+('Pneu X 205/55 R16',            'Pneu de alta performance',                 350.00, 100),
+('Filtro de óleo',               'Filtro para motores 1.0 a 2.0',             38.90, 500),
+('Pastilha de freio dianteira',  'Jogo com 4 pastilhas',                     189.90, 150),
+('Bateria 60Ah',                 'Bateria selada, 18 meses de garantia',     620.00,  40),
+('Amortecedor traseiro',         'Amortecedor a gás',                        430.00,  12),
+('Vela de ignição',              'Vela de níquel',                            24.50, 800),
+('Palheta limpador',             'Palheta de silicone 20 polegadas',          59.90,   0);
+
+INSERT INTO Vendas (ClienteID, FuncionarioID, DataVenda, TotalVenda) VALUES
+(1, 1,    '2024-03-04', 1477.80),
+(2, 2,    '2024-03-11', 6100.50),
+(3, 1,    '2024-04-02',  379.80),
+(2, 3,    '2024-04-18', 5440.00),
+(4, 4,    '2024-05-09',  781.00),
+(1, NULL, '2024-05-21',  700.00),
+(5, 2,    '2024-06-03', 1783.70),
+(3, 1,    '2024-06-17',  620.00);</code></pre>
+    </div>
+  </div>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 1 · 45 min</span>
+  <h2>INNER JOIN</h2>
+  <p>A chave estrangeira é a ponte. O JOIN é atravessar a ponte.</p>
+</section>
+
+<section class="slide">
+  <h2>O problema: o relatório só tem números</h2>
+<pre><code class="sql">SELECT VendaID, ClienteID, DataVenda, TotalVenda FROM Vendas;</code></pre>
+  <div class="duas">
+    <div>
+      <table>
+        <caption>Vendas</caption>
+        <tr><th>VendaID</th><th class="fk">ClienteID</th><th>DataVenda</th><th class="num">TotalVenda</th></tr>
+        <tr><td>1</td><td class="fk">1</td><td>2024-03-04</td><td class="num">1477.80</td></tr>
+        <tr><td>2</td><td class="fk">2</td><td>2024-03-11</td><td class="num">6100.50</td></tr>
+        <tr><td>3</td><td class="fk">3</td><td>2024-04-02</td><td class="num">379.80</td></tr>
+        <tr><td>…</td><td class="fk">…</td><td>…</td><td class="num">…</td></tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <caption>Clientes</caption>
+        <tr><th class="pk">ClienteID</th><th>Nome</th></tr>
+        <tr><td class="pk">1</td><td>BS Serviços Automotivos ME</td></tr>
+        <tr><td class="pk">2</td><td>Auto Peças Curitiba Ltda</td></tr>
+        <tr><td class="pk">3</td><td>Mecânica do Ademar</td></tr>
+        <tr><td class="pk">…</td><td>…</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="grande">O gerente quer ver o <strong>nome</strong> do cliente, não o número.</p>
+  <p>O nome está em outra tabela. Foi a modelagem que o colocou lá (e com razão): cada dado fica num lugar só. Precisamos de uma consulta que leia as duas e <strong>case as linhas</strong>.</p>
+</section>
+
+<section class="slide">
+  <h2>INNER JOIN: casando linhas</h2>
+<pre><code class="sql">SELECT Vendas.VendaID, Clientes.Nome, Vendas.DataVenda, Vendas.TotalVenda
+FROM Vendas
+INNER JOIN Clientes ON Vendas.ClienteID = Clientes.ClienteID
+ORDER BY Vendas.VendaID;</code></pre>
+  <table>
+    <tr><th>VendaID</th><th>Nome</th><th>DataVenda</th><th class="num">TotalVenda</th></tr>
+    <tr><td>1</td><td>BS Serviços Automotivos ME</td><td>2024-03-04</td><td class="num">1477.80</td></tr>
+    <tr><td>2</td><td>Auto Peças Curitiba Ltda</td><td>2024-03-11</td><td class="num">6100.50</td></tr>
+    <tr><td>3</td><td>Mecânica do Ademar</td><td>2024-04-02</td><td class="num">379.80</td></tr>
+    <tr><td colspan="4">… 8 linhas no total</td></tr>
+  </table>
+  <ul>
+    <li><code>FROM Vendas INNER JOIN Clientes</code> — as duas tabelas da consulta.</li>
+    <li><code>ON …</code> — a <strong>condição de junção</strong>: quase sempre <strong>FK = PK</strong>.</li>
+    <li><code>Tabela.Coluna</code> — as duas têm <code>ClienteID</code>; o prefixo diz de qual estamos falando.</li>
+  </ul>
+  <p class="fonte">Livro, cap. 11.3, p. 58–60. <code>JOIN</code> sozinho é o mesmo que <code>INNER JOIN</code> · <a href="https://dev.mysql.com/doc/refman/8.4/en/join.html">MySQL: JOIN</a></p>
+  
+</section>
+
+<section class="slide">
+  <h2>E se eu esquecer o ON?</h2>
+  <div class="duas">
+    <div>
+<pre><code class="sql">SELECT Vendas.VendaID, Clientes.Nome
+FROM Vendas
+JOIN Clientes;</code></pre>
+      <p>Resultado: <strong>48 linhas</strong>.</p>
+      <p>Sem condição, o SGBD combina <strong>cada</strong> venda com <strong>cada</strong> cliente: 8 × 6. É o <em class="termo">produto cartesiano</em>.</p>
+      <p>O <code>ON</code> fica só com as combinações que fazem sentido: aquelas em que o <code>ClienteID</code> da venda é o do cliente.</p>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Como o JOIN "pensa"</span>
+        <ol>
+          <li>Pega uma linha de Vendas.</li>
+          <li>Procura em Clientes as linhas que satisfazem o <code>ON</code>.</li>
+          <li>Para cada uma que achar, monta uma linha de resultado com as colunas das duas.</li>
+          <li>Repete para a próxima venda.</li>
+        </ol>
+      </div>
+      <div class="caixa aviso">Apareceram muito mais linhas do que você esperava? Quase sempre é <code>ON</code> faltando ou errado.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Apelidos de tabela</h2>
+  <p>Repetir <code>Vendas.</code> e <code>Clientes.</code> cansa. Damos um <em class="termo">alias</em> a cada tabela:</p>
+<pre><code class="sql">SELECT V.VendaID,
+       C.Nome AS Cliente,
+       V.DataVenda,
+       V.TotalVenda
+FROM Vendas V
+JOIN Clientes C ON V.ClienteID = C.ClienteID
+WHERE C.Estado = 'PR'
+ORDER BY V.DataVenda;</code></pre>
+  <ul>
+    <li><code>Vendas V</code> — dentro desta consulta, Vendas se chama <code>V</code>.</li>
+    <li><code>C.Nome AS Cliente</code> — alias de <strong>coluna</strong>: muda o título no resultado.</li>
+    <li><code>WHERE</code> e <code>ORDER BY</code> continuam funcionando, e podem usar colunas de <strong>qualquer</strong> uma das tabelas.</li>
+  </ul>
+  <p>Esta consulta traz 6 linhas: as vendas para clientes do Paraná.</p>
+  <p class="fonte">Livro, cap. 11.3, p. 57 e 63.</p>
+</section>
+
+<section class="slide exercicio">
+  <h2>Seus primeiros JOINs</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Duas tabelas por consulta. Antes de digitar, diga: <strong>qual FK liga as duas?</strong></p>
+  <ol>
+    <li>Número da venda, data e <strong>nome do funcionário</strong> que vendeu. Quantas linhas vieram? Por quê?</li>
+    <li>Número, total, <strong>nome e cargo do funcionário</strong> das vendas acima de R$ 1.000,00.</li>
+    <li>Número, nome do cliente e total das vendas para clientes de <strong>Curitiba</strong>.</li>
+    <li>Nome do cliente, data e total de <strong>todas</strong> as vendas, da maior para a menor.</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+  
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 2 · 35 min</span>
+  <h2>Três tabelas numa consulta</h2>
+  <p>Um JOIN de cada vez, seguindo as chaves estrangeiras.</p>
+</section>
+
+<section class="slide" style="font-size:.95em">
+  <h2>Encadeando JOINs</h2>
+  <div class="duas estreita-larga">
+    <div>
+      <div class="caixa centro">Clientes<br>▲ <span class="fonte">ClienteID</span><br><strong>Vendas</strong><br>▼ <span class="fonte">FuncionarioID</span><br>Funcionarios</div>
+      <p>Siga o caminho no esquema: cada seta é um <code>JOIN … ON FK = PK</code>. Vendas tem as duas FKs, por isso fica no meio.</p>
+    </div>
+    <div>
+<pre><code class="sql">SELECT V.VendaID,
+       C.Nome AS Cliente,
+       C.Cidade,
+       F.Nome AS Funcionario,
+       V.TotalVenda
+FROM Vendas V
+JOIN Clientes     C ON V.ClienteID     = C.ClienteID
+JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID
+WHERE V.TotalVenda > 1000
+ORDER BY V.TotalVenda DESC;</code></pre>
+    </div>
+  </div>
+  <table>
+    <tr><th>VendaID</th><th>Cliente</th><th>Cidade</th><th>Funcionario</th><th class="num">TotalVenda</th></tr>
+    <tr><td>2</td><td>Auto Peças Curitiba Ltda</td><td>Curitiba</td><td>Joaquim Silveira</td><td class="num">6100.50</td></tr>
+    <tr><td>4</td><td>Auto Peças Curitiba Ltda</td><td>Curitiba</td><td>Ruan Carlos Costa</td><td class="num">5440.00</td></tr>
+    <tr><td>7</td><td>Retífica Carmen</td><td>Maringá</td><td>Joaquim Silveira</td><td class="num">1783.70</td></tr>
+    <tr><td>1</td><td>BS Serviços Automotivos ME</td><td>Bauru</td><td>Agata Silva</td><td class="num">1477.80</td></tr>
+  </table>
+</section>
+
+<section class="slide">
+  <h2>Receita para escrever um JOIN grande</h2>
+  <ol>
+    <li><strong>Quais colunas</strong> o resultado precisa mostrar? Anote em que tabela cada uma mora.</li>
+    <li><strong>Trace o caminho</strong> entre essas tabelas no esquema, pelas FKs. Tabelas "de passagem" entram também.</li>
+    <li>Escreva o <code>FROM</code> com uma tabela e <strong>um <code>JOIN</code> por seta</strong>.</li>
+    <li>Rode com <code>SELECT *</code> e poucas linhas (<code>WHERE</code> numa venda só). Confira no olho.</li>
+    <li>Só então troque o <code>*</code> pelas colunas, ponha alias, <code>WHERE</code> e <code>ORDER BY</code> definitivos.</li>
+  </ol>
+  <div class="caixa ideia">
+    <span class="rotulo">Tabela de passagem</span>
+    "Quais clientes a Agata Silva já atendeu?" Quero só Clientes e Funcionarios, mas não existe FK entre eles. O caminho passa por Vendas: são <strong>três</strong> tabelas no <code>FROM</code>, mesmo mostrando colunas de duas.
+  </div>
+</section>
+
+<section class="slide exercicio">
+  <h2>O comprovante da venda 7</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Monte uma consulta que mostre, para a venda 7:</p>
+  <p>data · total · nome, CNPJ e cidade do cliente · nome e cargo do funcionário</p>
+  <p>Depois, uma segunda consulta: <strong>quais funcionários já atenderam a Mecânica do Ademar?</strong> Rode sem e com <code>DISTINCT</code> e compare.</p>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Intervalo · 20 min</span>
+  <h2>Na volta: quem ficou de fora?</h2>
+  <p>A venda 6 sumiu do relatório. Vamos trazê-la de volta.</p>
+</section>
+
+<section class="slide">
+  <h2>O que o INNER JOIN esconde</h2>
+<pre><code class="sql">SELECT V.VendaID, V.TotalVenda, F.Nome AS Funcionario
+FROM Vendas V
+INNER JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID
+ORDER BY V.VendaID;</code></pre>
+  <div class="duas">
+    <div>
+      <table>
+        <tr><th>VendaID</th><th class="num">TotalVenda</th><th>Funcionario</th></tr>
+        <tr><td>1</td><td class="num">1477.80</td><td>Agata Silva</td></tr>
+        <tr><td>…</td><td class="num">…</td><td>…</td></tr>
+        <tr><td>5</td><td class="num">781.00</td><td>Carmen Moura</td></tr>
+        <tr><td>7</td><td class="num">1783.70</td><td>Joaquim Silveira</td></tr>
+        <tr><td>8</td><td class="num">620.00</td><td>Agata Silva</td></tr>
+      </table>
+    </div>
+    <div>
+      <p><strong>7 linhas.</strong> A venda 6 (R$ 700,00, feita pelo site) não aparece.</p>
+      <p>Ela tem <code>FuncionarioID</code> NULL. NULL não é igual a nada, então o <code>ON</code> nunca fica verdadeiro para ela.</p>
+      <div class="caixa aviso">O <code>INNER JOIN</code> só devolve linhas que têm <strong>par dos dois lados</strong>. Se o gerente somar esse relatório, vão faltar R$ 700,00.</div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 60 e 62.</p>
+</section>
+
+<section class="slide">
+  <h2>LEFT JOIN: todas as linhas da esquerda</h2>
+<pre><code class="sql">SELECT V.VendaID, V.TotalVenda, F.Nome AS Funcionario
+FROM Vendas V
+LEFT JOIN Funcionarios F ON V.FuncionarioID = F.FuncionarioID
+ORDER BY V.VendaID;</code></pre>
+  <div class="duas">
+    <div>
+      <table>
+        <tr><th>VendaID</th><th class="num">TotalVenda</th><th>Funcionario</th></tr>
+        <tr><td>…</td><td class="num">…</td><td>…</td></tr>
+        <tr><td>5</td><td class="num">781.00</td><td>Carmen Moura</td></tr>
+        <tr><td><strong>6</strong></td><td class="num"><strong>700.00</strong></td><td class="nulo">NULL</td></tr>
+        <tr><td>7</td><td class="num">1783.70</td><td>Joaquim Silveira</td></tr>
+        <tr><td>8</td><td class="num">620.00</td><td>Agata Silva</td></tr>
+      </table>
+      <p><strong>8 linhas.</strong></p>
+    </div>
+    <div>
+      <p><em class="termo">LEFT JOIN</em>: traz <strong>todas</strong> as linhas da tabela da esquerda (a que vem antes da palavra <code>JOIN</code>). Onde não houver par, as colunas da direita vêm com NULL.</p>
+      <div class="caixa">
+        <span class="rotulo">"Esquerda" é posição no texto</span>
+        <code>FROM <u>Vendas</u> LEFT JOIN Funcionarios</code><br>Esquerda = Vendas. Todas as vendas aparecem.
+      </div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 62–63. <code>LEFT OUTER JOIN</code> é o mesmo comando por extenso.</p>
+</section>
+
+<section class="slide">
+  <h2>Trocando o lado: quem nunca vendeu?</h2>
+  <div class="duas">
+    <div>
+<pre><code class="sql">SELECT F.Nome, V.VendaID
+FROM Funcionarios F
+LEFT JOIN Vendas V
+       ON V.FuncionarioID = F.FuncionarioID
+ORDER BY F.Nome;</code></pre>
+      <table>
+        <tr><th>Nome</th><th>VendaID</th></tr>
+        <tr><td>Agata Silva</td><td>1</td></tr>
+        <tr><td>Agata Silva</td><td>3</td></tr>
+        <tr><td>Agata Silva</td><td>8</td></tr>
+        <tr><td>Carmen Moura</td><td>5</td></tr>
+        <tr><td><strong>Fernanda Lemes</strong></td><td class="nulo">NULL</td></tr>
+        <tr><td>Joaquim Silveira</td><td>2</td></tr>
+        <tr><td>…</td><td>…</td></tr>
+      </table>
+    </div>
+    <div>
+      <p>Agora a esquerda é <strong>Funcionarios</strong>: todos aparecem, inclusive quem não tem venda.</p>
+      <p>Para ficar <strong>só</strong> com quem não tem par, filtre o NULL:</p>
+<pre><code class="sql">SELECT F.Nome
+FROM Funcionarios F
+LEFT JOIN Vendas V
+       ON V.FuncionarioID = F.FuncionarioID
+WHERE V.VendaID IS NULL;</code></pre>
+      <table>
+        <tr><th>Nome</th></tr>
+        <tr><td>Fernanda Lemes</td></tr>
+      </table>
+      <div class="caixa ideia"><code>LEFT JOIN</code> + <code>IS NULL</code> = "quem <strong>não</strong> tem". Um dos padrões mais usados em SQL.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>RIGHT JOIN e o que não existe aqui</h2>
+  <table>
+    <tr><th>Junção</th><th>Devolve</th><th>No MySQL</th></tr>
+    <tr><td><code>INNER JOIN</code></td><td>Só as linhas com par dos dois lados.</td><td>✔</td></tr>
+    <tr><td><code>LEFT JOIN</code></td><td>Todas da esquerda + par da direita, ou NULL.</td><td>✔</td></tr>
+    <tr><td><code>RIGHT JOIN</code></td><td>Todas da direita + par da esquerda, ou NULL.</td><td>✔</td></tr>
+    <tr><td><code>FULL OUTER JOIN</code></td><td>Todas das duas, com NULL onde faltar par.</td><td>✘ não existe</td></tr>
+  </table>
+  <div class="duas">
+    <div>
+      <p>Estas duas consultas dão o <strong>mesmo</strong> resultado:</p>
+<pre><code class="sql">FROM Funcionarios F LEFT JOIN Vendas V ON …
+
+FROM Vendas V RIGHT JOIN Funcionarios F ON …</code></pre>
+    </div>
+    <div>
+      <div class="caixa">Na prática, quase todo mundo escreve só <code>LEFT JOIN</code> e escolhe qual tabela vem primeiro. É mais fácil de ler: "tudo desta, mais o que houver daquela".</div>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 62–64 · <a href="https://dev.mysql.com/doc/refman/8.4/en/join.html">MySQL: JOIN</a> (a gramática lista INNER, CROSS, LEFT, RIGHT e NATURAL).</p>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Quem ficou de fora?</h2>
+  <p><span class="timer" data-min="15"></span> &nbsp;Para cada item, decida primeiro: <strong>qual tabela precisa aparecer inteira?</strong> Ela vai à esquerda.</p>
+  <ol>
+    <li>Todos os clientes e o número de cada venda que fizeram. Quem não comprou deve aparecer também.</li>
+    <li>Só os clientes que <strong>nunca</strong> compraram.</li>
+    <li>Refaça o item 1 com <code>RIGHT JOIN</code>, começando o <code>FROM</code> por Vendas.</li>
+    <li>Todas as vendas com o nome do cliente e do funcionário, <strong>sem perder a venda 6</strong>.</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide secao">
+  <span class="bloco">Bloco 4 · 35 min</span>
+  <h2>CASE, IN e EXISTS</h2>
+  <p>Três ferramentas que o livro traz para deixar a consulta mais inteligente.</p>
+</section>
+
+<section class="slide">
+  <h2>CASE: um if dentro do SELECT</h2>
+  <div class="duas larga-estreita">
+    <div>
+<pre><code class="sql">SELECT V.VendaID,
+       C.Nome AS Cliente,
+       V.TotalVenda,
+       CASE
+           WHEN V.TotalVenda < 1000 THEN 'Pequena'
+           WHEN V.TotalVenda BETWEEN 1000 AND 5000 THEN 'Média'
+           ELSE 'Grande'
+       END AS CategoriaVenda
+FROM Vendas V
+JOIN Clientes C ON V.ClienteID = C.ClienteID
+ORDER BY V.VendaID;</code></pre>
+      <ul>
+        <li>As cláusulas <code>WHEN</code> são testadas <strong>de cima para baixo</strong>; vale a primeira verdadeira.</li>
+        <li><code>ELSE</code> pega o que sobrou. Começa com <code>CASE</code>, termina com <code>END</code>.</li>
+      </ul>
+    </div>
+    <div>
+      <table>
+        <tr><th>VendaID</th><th class="num">TotalVenda</th><th>Categoria</th></tr>
+        <tr><td>1</td><td class="num">1477.80</td><td>Média</td></tr>
+        <tr><td>2</td><td class="num">6100.50</td><td>Grande</td></tr>
+        <tr><td>3</td><td class="num">379.80</td><td>Pequena</td></tr>
+        <tr><td>4</td><td class="num">5440.00</td><td>Grande</td></tr>
+        <tr><td>5</td><td class="num">781.00</td><td>Pequena</td></tr>
+        <tr><td>6</td><td class="num">700.00</td><td>Pequena</td></tr>
+        <tr><td>7</td><td class="num">1783.70</td><td>Média</td></tr>
+        <tr><td>8</td><td class="num">620.00</td><td>Pequena</td></tr>
+      </table>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 66–67 · <a href="https://dev.mysql.com/doc/refman/8.4/en/flow-control-functions.html">MySQL: CASE</a></p>
+</section>
+
+<section class="slide">
+  <h2>Subconsulta: um SELECT dentro do outro</h2>
+  <div class="duas">
+    <div>
+      <p><strong>IN com subconsulta</strong> — a lista vem de outra consulta:</p>
+<pre><code class="sql">SELECT Nome
+FROM Clientes
+WHERE ClienteID IN (
+    SELECT ClienteID
+    FROM Vendas
+    WHERE TotalVenda > 5000
+);</code></pre>
+      <p>A consulta de dentro devolve o ClienteID 2 (duas vezes: vendas 2 e 4); a de fora mostra o nome: <strong>Auto Peças Curitiba Ltda</strong>.</p>
+    </div>
+    <div>
+      <p><strong>EXISTS</strong> — verdadeiro se a subconsulta devolver <strong>pelo menos uma linha</strong>:</p>
+<pre><code class="sql">SELECT C.Nome
+FROM Clientes C
+WHERE EXISTS (
+    SELECT 1
+    FROM Vendas V
+    WHERE V.ClienteID = C.ClienteID
+      AND V.TotalVenda > 5000
+);</code></pre>
+      <p>Mesmo resultado. Repare: a subconsulta usa <code>C.ClienteID</code>, da consulta de fora. Ela é avaliada para cada cliente.</p>
+    </div>
+  </div>
+  <p class="fonte">Livro, cap. 11.3, p. 64–66. Um <code>JOIN</code> com <code>DISTINCT</code> chega ao mesmo resultado: em SQL quase sempre há mais de um caminho.</p>
+  
+</section>
+
+<section class="slide exercicio">
+  <h2>Desafio: perguntas do dono da AutoNex</h2>
+  <p><span class="timer" data-min="30"></span> &nbsp;Em dupla. Use a receita: colunas → caminho → JOINs → conferir.</p>
+  <ol>
+    <li>"Quais funcionários já venderam para clientes de <strong>Curitiba</strong>?" (sem repetir nomes)</li>
+    <li>"Quero a lista de todas as vendas com o nome do vendedor; quando for pelo site, escreva <strong>'Site'</strong>."</li>
+    <li>"De cada venda: número, cliente, estado e a etiqueta <strong>'Paraná'</strong> se o cliente for do PR, senão <strong>'Outro estado'</strong>."</li>
+    <li>"Quais clientes do <strong>Paraná</strong> foram atendidos pela <strong>Agata Silva</strong>?"</li>
+  </ol>
+  <p class="fonte">A resposta aparece aqui depois da próxima aula.</p>
+</section>
+
+<section class="slide">
+  <h2>Revisão relâmpago</h2>
+  <div class="quiz">
+    <p class="pergunta">1. Na condição <code>ON</code> de um JOIN, normalmente comparamos…</p>
+    <ol>
+      <li>duas chaves primárias</li>
+      <li data-certa>uma FK com uma PK</li>
+      <li>dois nomes de tabela</li>
+    </ol>
+    <div class="explica">A FK de uma tabela com a PK da tabela que ela referencia.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">2. <code>FROM Clientes C LEFT JOIN Vendas V ON …</code> garante que aparecem todos os…</p>
+    <ol>
+      <li>vendas</li>
+      <li data-certa>clientes</li>
+      <li>pares casados</li>
+    </ol>
+    <div class="explica">A tabela da esquerda (antes do JOIN) aparece inteira.</div>
+  </div>
+  <div class="quiz">
+    <p class="pergunta">3. Um JOIN devolveu 48 linhas quando você esperava 8. O que provavelmente houve?</p>
+    <ol>
+      <li>Faltou o <code>ORDER BY</code> no final</li>
+      <li data-certa>Faltou ou errou o <code>ON</code></li>
+      <li>Faltou o alias das tabelas</li>
+    </ol>
+    <div class="explica">Produto cartesiano: cada linha combinada com todas da outra tabela.</div>
+  </div>
+</section>
+
+<section class="slide">
+  <h2>Para casa e para a próxima aula</h2>
+  <div class="duas">
+    <div>
+      <div class="caixa certo">
+        <span class="rotulo">Hoje você conseguiu</span>
+        Juntar três tabelas numa consulta, recuperar quem não tem par com LEFT JOIN e classificar resultados com CASE.
+      </div>
+      <p><strong>Lista 6:</strong> <a href="../listas/lista-06.html">listas/lista-06.html</a> — JOINs na BiblioTech.</p>
+      <p><strong>Leitura:</strong> livro, 11.3 (p. 56–67).</p>
+      <p><strong>Consulta rápida:</strong> <a href="../reference/cola-sql.html">cola de SQL</a></p>
+    </div>
+    <div>
+      <div class="caixa ideia">
+        <span class="rotulo">Próxima aula — a última</span>
+        Guardar uma consulta pronta com <strong>views</strong>, um panorama do que existe além do nosso recorte, e o <strong>projeto integrador</strong>: um banco do zero, do texto ao JOIN.
+        <br>Aula 7 → · <a href="0005-dml-e-select.html">← Aula 5</a>
+      </div>
+      <p class="fonte">Dúvidas sobre o material? Pergunte ao professor.</p>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
